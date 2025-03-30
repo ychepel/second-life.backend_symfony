@@ -7,14 +7,14 @@ RUN apk update && apk add --no-cache \
     git \
     curl \
     libzip-dev \
-    libicu-dev \
-    pdo_mysql \
     icu-dev \
+    curl-dev \
     && docker-php-ext-install zip \
     intl \
     opcache \
-    && apk add --no-cache curl-dev \
-    && docker-php-ext-install curl
+    pdo \
+    pdo_mysql \
+    curl
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

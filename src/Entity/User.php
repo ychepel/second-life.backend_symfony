@@ -1,0 +1,173 @@
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+class User implements PasswordAuthenticatedUserInterface
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'bigint')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(type: 'string', length: 60, unique: true)]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isActive = true;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [UserRoles::USER->value];
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTime $updatedAt = null;
+
+    #[ORM\ManyToOne(targetEntity: Location::class)]
+    private ?Location $location = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): self
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTime $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTime $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function addRole(UserRoles $role): self
+    {
+        $roles = $this->getRoles();
+        if (!in_array($role->value, $roles)) {
+            $roles[] = $role->value;
+            $this->setRoles($roles);
+        }
+        return $this;
+    }
+
+    public function removeRole(UserRoles $role): self
+    {
+        $roles = $this->getRoles();
+        if (($key = array_search($role->value, $roles)) !== false) {
+            unset($roles[$key]);
+            $this->setRoles(array_values($roles));
+        }
+        return $this;
+    }
+
+    public function hasRole(UserRoles $role): bool
+    {
+        return in_array($role->value, $this->getRoles());
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?Location $location): void
+    {
+        $this->location = $location;
+    }
+}
