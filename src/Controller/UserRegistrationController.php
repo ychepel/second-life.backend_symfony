@@ -6,7 +6,7 @@ use App\Dto\UserRegistrationRequest;
 use App\Dto\UserRegistrationResponse;
 use App\Entity\Image;
 use App\Entity\User;
-use App\Entity\UserRole;
+use App\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,14 +26,12 @@ class UserRegistrationController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TranslatorInterface $translator,
-        private readonly SerializerInterface $serializer,
-        private readonly LoggerInterface $logger
+        private readonly SerializerInterface $serializer
     ) {}
 
     #[Route(path: 'api/v1/users/register', name: 'register', methods: ['POST'])]
     public function register(#[MapRequestPayload] UserRegistrationRequest $request): Response
     {
-        $this->logger->debug("Email: {$request->getEmail()}");
         // Check if email already exists
         $existingUser = $this->entityManager->getRepository(User::class)
             ->findOneBy(['email' => $request->getEmail()]);

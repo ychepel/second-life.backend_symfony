@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use App\Enum\UserRole;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
+#[ORM\HasLifecycleCallbacks]
 class User implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -40,6 +42,12 @@ class User implements PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(targetEntity: Location::class)]
     private ?Location $location = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -116,6 +124,7 @@ class User implements PasswordAuthenticatedUserInterface
         return $this->updatedAt;
     }
 
+    #[ORM\PreUpdate]
     public function setUpdatedAt(?\DateTime $updatedAt): self
     {
         $this->updatedAt = $updatedAt;

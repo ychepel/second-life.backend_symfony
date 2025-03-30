@@ -4,13 +4,9 @@ namespace App\Tests\Controller;
 
 use App\Entity\Image;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\SchemaTool;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserRegistrationControllerTest extends WebTestCase
+class UserRegistrationControllerTest extends ControllerTest
 {
 
     private const TEST_IMAGES = [
@@ -25,29 +21,6 @@ class UserRegistrationControllerTest extends WebTestCase
         'email' => 'user@mail.com',
         'password' => 'Qwerty!123'
     ];
-
-    private KernelBrowser $client;
-    protected EntityManagerInterface $entityManager;
-
-    protected function setUp(): void
-    {
-        $this->client = static::createClient();
-
-        $this->entityManager = self::getContainer()->get('doctrine')->getManager();
-
-        $schemaTool = new SchemaTool($this->entityManager);
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-
-        $schemaTool->dropSchema($metadata);
-        $schemaTool->createSchema($metadata);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->entityManager->close();
-        unset($this->entityManager);
-    }
 
     public function testRegisterUserSuccess(): void
     {
