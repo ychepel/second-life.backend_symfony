@@ -26,14 +26,11 @@ class User implements PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $lastName = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $phone = null;
-
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'json')]
-    private array $roles = [UserRoles::USER->value];
+    #[ORM\Column(type: 'string')]
+    private string $role = UserRole::USER->value;
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $createdAt = null;
@@ -125,40 +122,15 @@ class User implements PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRoles(): array
+    public function getRole(): UserRole
     {
-        return $this->roles;
+        return UserRole::from($this->role);
     }
 
-    public function setRoles(array $roles): self
+    public function setRole(UserRole $role): self
     {
-        $this->roles = $roles;
+        $this->role = $role->value;
         return $this;
-    }
-
-    public function addRole(UserRoles $role): self
-    {
-        $roles = $this->getRoles();
-        if (!in_array($role->value, $roles)) {
-            $roles[] = $role->value;
-            $this->setRoles($roles);
-        }
-        return $this;
-    }
-
-    public function removeRole(UserRoles $role): self
-    {
-        $roles = $this->getRoles();
-        if (($key = array_search($role->value, $roles)) !== false) {
-            unset($roles[$key]);
-            $this->setRoles(array_values($roles));
-        }
-        return $this;
-    }
-
-    public function hasRole(UserRoles $role): bool
-    {
-        return in_array($role->value, $this->getRoles());
     }
 
     public function getLocation(): ?Location

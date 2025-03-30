@@ -6,6 +6,7 @@ use App\Dto\UserRegistrationRequest;
 use App\Dto\UserRegistrationResponse;
 use App\Entity\Image;
 use App\Entity\User;
+use App\Entity\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,6 +50,7 @@ class UserRegistrationController extends AbstractController
         $user->setEmail($request->getEmail())
             ->setFirstName($request->getFirstName())
             ->setLastName($request->getLastName())
+            ->setRole(UserRole::USER)
             ->setCreatedAt(new \DateTime())
             ->setUpdatedAt(new \DateTime())
             ->setIsActive(true);
