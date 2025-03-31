@@ -10,8 +10,11 @@ use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -85,12 +88,28 @@ class AuthController extends AbstractController
 
         $accessToken = $this->jwtEncoder->encode($tokenData);
 
-        $response = new LoginResponse();
-        $response->setClientId($user->getId());
-        $response->setAccessToken($accessToken);
-        $response->setRefreshToken($refreshToken);
+        $responseData = new LoginResponse();
+        $responseData->setClientId($user->getId());
+        $responseData->setAccessToken($accessToken);
+        $responseData->setRefreshToken($refreshToken);
 
-        return new JsonResponse($this->serializer->serialize($response, 'json'), Response::HTTP_OK, [], true);
+        $response = new JsonResponse($this->serializer->serialize($responseData, 'json'), Response::HTTP_OK, [], true);
+
+        $response->headers->setCookie(
+            new Cookie(
+                'access_token',
+                $accessToken,
+                $accessTokenExpiration,
+                '/',
+                null,
+                true,
+                true,
+                false,
+                'strict'
+            )
+        );
+
+        return $response;
     }
 
     #[Route('/api/v1/auth/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
@@ -101,7 +120,7 @@ class AuthController extends AbstractController
     ): Response {
         try {
             $tokenData = $this->jwtEncoder->decode($refreshTokenRequest->getRefreshToken());
-        } catch (\Exception $e) {
+        } catch (JWTDecodeFailureException $e) {
             return new JsonResponse([
                 'error' => 'Invalid refresh token'
             ], Response::HTTP_BAD_REQUEST);
@@ -162,11 +181,73 @@ class AuthController extends AbstractController
 
         $newAccessToken = $this->jwtEncoder->encode($newTokenData);
 
-        $response = new LoginResponse();
-        $response->setClientId($user->getId());
-        $response->setAccessToken($newAccessToken);
-        $response->setRefreshToken($newRefreshToken);
+        $responseData = new LoginResponse();
+        $responseData->setClientId($user->getId());
+        $responseData->setAccessToken($newAccessToken);
+        $responseData->setRefreshToken($newRefreshToken);
 
-        return new JsonResponse($this->serializer->serialize($response, 'json'), Response::HTTP_OK, [], true);
+        $response = new JsonResponse($this->serializer->serialize($responseData, 'json'), Response::HTTP_OK, [], true);
+        
+        $response->headers->setCookie(
+            new Cookie(
+                'access_token',
+                $newAccessToken,
+                $accessTokenExpiration,
+                '/',
+                null,
+                true,
+                true,
+                false,
+                'strict'
+            )
+        );
+
+        return $response;
+    }
+
+    #[Route('/api/v1/auth/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
+    public function logout(
+        Request $request,
+        string $roleName,
+        UserRepository $userRepository
+    ): Response {
+        try {
+            $accessToken = $request->cookies->get('access_token');
+            if (!$accessToken) {
+                throw new \Exception('Access token not found in cookies');
+            }
+
+            $tokenData = $this->jwtEncoder->decode($accessToken);
+            if (!isset($tokenData['client_id']) || !isset($tokenData['email'])) {
+                throw new \Exception('Invalid token data');
+            }
+
+            $user = $userRepository->find($tokenData['client_id']);
+            if (!$user) {
+                throw new \Exception('User not found');
+            }
+
+            if ($user->getRole() !== UserRole::from($roleName)) {
+                throw new \Exception('Invalid role');
+            }
+
+            $refreshToken = $this->entityManager->getRepository(RefreshToken::class)->findOneBy([
+                'email' => $tokenData['email']
+            ]);
+
+            if ($refreshToken) {
+                $this->entityManager->remove($refreshToken);
+                $this->entityManager->flush();
+            }
+
+            $response = new JsonResponse(['message' => 'Successfully logged out'], Response::HTTP_OK);
+            $response->headers->clearCookie('access_token');
+
+            return $response;
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Logout failed: ' . $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }

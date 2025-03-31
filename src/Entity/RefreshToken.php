@@ -23,7 +23,7 @@ class RefreshToken
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[ORM\Column(type: 'string', length: 600, unique: true)]
     private string $token;
 
     #[ORM\Column(type: 'datetime_immutable')]
