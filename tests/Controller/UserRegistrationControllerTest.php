@@ -29,14 +29,7 @@ class UserRegistrationControllerTest extends ControllerTest
             self::TEST_USER_DATA
         );
 
-        $this->client->request(
-            'POST',
-            '/api/v1/users/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
-        );
+        $this->apiRequest('POST','/api/v1/users/register',$data);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
@@ -88,14 +81,7 @@ class UserRegistrationControllerTest extends ControllerTest
         );
         $data['email'] = 'invalid-email';
 
-        $this->client->request(
-            'POST',
-            '/api/v1/users/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
-        );
+        $this->apiRequest('POST','/api/v1/users/register',$data);
 
         $response = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -113,14 +99,7 @@ class UserRegistrationControllerTest extends ControllerTest
         );
         $data['password'] = 'weak';
 
-        $this->client->request(
-            'POST',
-            '/api/v1/users/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
-        );
+        $this->apiRequest('POST','/api/v1/users/register',$data);
 
         $response = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -138,27 +117,13 @@ class UserRegistrationControllerTest extends ControllerTest
             self::TEST_USER_DATA
         );
 
-        $this->client->request(
-            'POST',
-            '/api/v1/users/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
-        );
+        $this->apiRequest('POST','/api/v1/users/register',$data);
 
         $response1 = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_CREATED, $response1->getStatusCode());
 
         // Second registration with same email
-        $this->client->request(
-            'POST',
-            '/api/v1/users/register',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode($data)
-        );
+        $this->apiRequest('POST','/api/v1/users/register',$data);
 
         $response2 = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response2->getStatusCode());

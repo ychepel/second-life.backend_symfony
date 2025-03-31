@@ -31,4 +31,16 @@ abstract class ControllerTest extends WebTestCase
         $this->entityManager->close();
         unset($this->entityManager);
     }
+
+    protected function apiRequest(string $method, string $url, array $data = []): void
+    {
+        $this->client->request(
+            $method,
+            $url,
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode($data)
+        );
+    }
 }
