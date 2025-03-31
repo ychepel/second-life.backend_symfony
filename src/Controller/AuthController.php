@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsController]
+#[Route('/api/v1/auth')]
 class AuthController extends AbstractController
 {
     private const ACCESS_TOKEN_EXPIRATION_DAYS = 30;
@@ -37,7 +38,7 @@ class AuthController extends AbstractController
     ) {
     }
 
-    #[Route('/api/v1/auth/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
+    #[Route('/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function login(
         #[MapRequestPayload] LoginRequest $loginRequest,
         string $roleName,
@@ -112,7 +113,7 @@ class AuthController extends AbstractController
         return $response;
     }
 
-    #[Route('/api/v1/auth/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
+    #[Route('/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function refreshAccessToken(
         #[MapRequestPayload] RefreshTokenRequest $refreshTokenRequest,
         string $roleName,
@@ -205,7 +206,7 @@ class AuthController extends AbstractController
         return $response;
     }
 
-    #[Route('/api/v1/auth/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
+    #[Route('/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
     public function logout(
         Request $request,
         string $roleName,

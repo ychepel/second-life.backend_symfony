@@ -34,9 +34,7 @@ class AuthControllerTest extends ControllerTest
             'password' => self::TEST_USER_DATA['password'],
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -53,9 +51,7 @@ class AuthControllerTest extends ControllerTest
             'password' => self::TEST_USER_DATA['password'],
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -81,9 +77,7 @@ class AuthControllerTest extends ControllerTest
             'password' => 'wrong_password',
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -109,9 +103,7 @@ class AuthControllerTest extends ControllerTest
             'password' => 'wrong_password',
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/admin/login', $requestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/admin/login', $requestData);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -145,9 +137,7 @@ class AuthControllerTest extends ControllerTest
             'refreshToken' => $loginResponse['refreshToken']
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/user/access', $refreshRequestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/user/access', $refreshRequestData);
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -175,9 +165,7 @@ class AuthControllerTest extends ControllerTest
             'refreshToken' => 'invalid.token'
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/user/access', $refreshRequestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/user/access', $refreshRequestData);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -211,9 +199,7 @@ class AuthControllerTest extends ControllerTest
             'refreshToken' => $loginResponse['refreshToken']
         ];
 
-        $this->apiRequest('POST', '/api/v1/auth/admin/access', $refreshRequestData);
-
-        $response = $this->client->getResponse();
+        $response = $this->apiRequest('POST', '/api/v1/auth/admin/access', $refreshRequestData);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);

@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class ControllerTest extends WebTestCase
 {
@@ -32,7 +33,7 @@ abstract class ControllerTest extends WebTestCase
         unset($this->entityManager);
     }
 
-    protected function apiRequest(string $method, string $url, array $data = []): void
+    protected function apiRequest(string $method, string $url, array $data = []): Response
     {
         $this->client->request(
             $method,
@@ -42,5 +43,7 @@ abstract class ControllerTest extends WebTestCase
             ['CONTENT_TYPE' => 'application/json'],
             json_encode($data)
         );
+
+        return $this->client->getResponse();
     }
 }
