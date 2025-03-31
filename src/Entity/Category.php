@@ -59,4 +59,15 @@ class Category
         $this->description = $description;
         return $this;
     }
+
+    public function getImages(): array
+    {
+        //TODO: implement images logic
+        return [];
+    }
+
+    public function setImages(): void
+    {
+        //TODO: implement images logic
+    }
 }

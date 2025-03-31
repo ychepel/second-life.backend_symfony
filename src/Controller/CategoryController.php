@@ -1,0 +1,132 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Category;
+use App\Repository\CategoryRepository;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/v1')]
+class CategoryController extends AbstractController
+{
+    #[Route('/categories/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getCategory(int $id, CategoryRepository $categoryRepository): JsonResponse
+    {
+        $category = $categoryRepository->findOneBy(['id' => $id, 'isActive' => true]);
+
+        if (!$category) {
+            return new JsonResponse([
+                'error' => 'Category not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $response = [
+            'images' => [
+                'values' => $this->formatImages($category->getImages())
+            ],
+            'id' => $category->getId(),
+            'name' => $category->getName(),
+            'description' => $category->getDescription(),
+            'active' => $category->isActive()
+        ];
+
+        return new JsonResponse($response);
+    }
+
+    #[Route('/categories', name: 'categories_list', methods: ['GET'])]
+    public function getCategories(CategoryRepository $categoryRepository): JsonResponse
+    {
+        $categories = $categoryRepository->findBy(['isActive' => true]);
+
+        $response = [
+            'categories' => array_map(function (Category $category) {
+                return [
+                    'images' => [
+                        'values' => $this->formatImages($category->getImages())
+                    ],
+                    'id' => $category->getId(),
+                    'name' => $category->getName(),
+                    'description' => $category->getDescription(),
+                    'active' => $category->isActive()
+                ];
+            }, $categories)
+        ];
+
+        return new JsonResponse($response);
+    }
+
+    #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
+    public function getAllCategoriesForAdmin(
+        Request $request,
+        CategoryRepository $categoryRepository,
+        JWTEncoderInterface $jwtEncoder
+    ): JsonResponse {
+        try {
+            // Get access token from cookies
+            $accessToken = $request->cookies->get('access_token');
+            if (!$accessToken) {
+                return new JsonResponse([
+                    'error' => 'Access token not found'
+                ], JsonResponse::HTTP_UNAUTHORIZED);
+            }
+
+            // Decode token and verify role
+            $tokenData = $jwtEncoder->decode($accessToken);
+            if (!isset($tokenData['role']) || $tokenData['role'] !== 'admin') {
+                return new JsonResponse([
+                    'error' => 'Access denied'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $categories = $categoryRepository->findAll();
+
+            $response = [
+                'categories' => array_map(function (Category $category) {
+                    return [
+                        'images' => [
+                            'values' => $this->formatImages($category->getImages())
+                        ],
+                        'id' => $category->getId(),
+                        'name' => $category->getName(),
+                        'description' => $category->getDescription(),
+                        'active' => $category->isActive()
+                    ];
+                }, $categories)
+            ];
+
+            return new JsonResponse($response);
+        } catch (JWTDecodeFailureException $e) {
+            return new JsonResponse([
+                'error' => 'Invalid token'
+            ], Response::HTTP_UNAUTHORIZED);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Internal server error'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private function formatImages(?array $images): array
+    {
+        if (!$images) {
+            return [];
+        }
+
+        $formattedImages = [];
+        foreach ($images as $imageId => $imageData) {
+            $formattedImages[$imageId] = [
+                '1024x1024' => sprintf('https://domain.com/prod/offer/1/1024x1024_%s.jpg', $imageId),
+                '320x320' => sprintf('https://domain.com/prod/offer/1/320x320_%s.jpg', $imageId),
+                '64x64' => sprintf('https://domain.com/prod/offer/1/64x64_%s.jpg', $imageId)
+            ];
+        }
+
+        return $formattedImages;
+    }
+}
