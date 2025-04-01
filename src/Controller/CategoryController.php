@@ -21,7 +21,7 @@ class CategoryController extends AbstractController
         $category = $categoryRepository->findOneBy(['id' => $id, 'isActive' => true]);
 
         if (!$category) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Category not found'
             ], Response::HTTP_NOT_FOUND);
         }
@@ -36,7 +36,7 @@ class CategoryController extends AbstractController
             'active' => $category->isActive()
         ];
 
-        return new JsonResponse($response);
+        return $this->json($response);
     }
 
     #[Route('/categories', name: 'categories_list', methods: ['GET'])]
@@ -58,7 +58,7 @@ class CategoryController extends AbstractController
             }, $categories)
         ];
 
-        return new JsonResponse($response);
+        return $this->json($response);
     }
 
     #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
@@ -71,15 +71,15 @@ class CategoryController extends AbstractController
             // Get access token from cookies
             $accessToken = $request->cookies->get('access_token');
             if (!$accessToken) {
-                return new JsonResponse([
+                return $this->json([
                     'error' => 'Access token not found'
-                ], JsonResponse::HTTP_UNAUTHORIZED);
+                ], Response::HTTP_UNAUTHORIZED);
             }
 
             // Decode token and verify role
             $tokenData = $jwtEncoder->decode($accessToken);
             if (!isset($tokenData['role']) || $tokenData['role'] !== 'admin') {
-                return new JsonResponse([
+                return $this->json([
                     'error' => 'Access denied'
                 ], Response::HTTP_FORBIDDEN);
             }
@@ -100,13 +100,13 @@ class CategoryController extends AbstractController
                 }, $categories)
             ];
 
-            return new JsonResponse($response);
+            return $this->json($response);
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid token'
             ], Response::HTTP_UNAUTHORIZED);
         } catch (\Exception $e) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Internal server error'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }

@@ -6,7 +6,7 @@ use App\Entity\Image;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserRegistrationControllerTest extends ControllerTest
+class UserControllerTest extends ControllerTest
 {
 
     private const TEST_IMAGES = [

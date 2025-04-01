@@ -14,13 +14,11 @@ use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/v1/auth')]
 class AuthController extends AbstractController
@@ -31,8 +29,7 @@ class AuthController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly JWTEncoderInterface $jwtEncoder,
-        private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
-        private readonly SerializerInterface $serializer
+        private readonly PasswordHasherFactoryInterface $passwordHasherFactory
     ) {
     }
 
@@ -45,20 +42,20 @@ class AuthController extends AbstractController
         $user = $userRepository->findOneBy(['email' => $loginRequest->getEmail()]);
 
         if (!$user) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid input or missing account'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($user->getRole() !== UserRole::from($roleName)) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid role'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($user);
         if (!$passwordHasher->verify($user->getPassword(), $loginRequest->getPassword())) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Incorrect password'
             ], Response::HTTP_UNAUTHORIZED);
         }
@@ -92,7 +89,7 @@ class AuthController extends AbstractController
         $responseData->setAccessToken($accessToken);
         $responseData->setRefreshToken($refreshToken);
 
-        $response = new JsonResponse($this->serializer->serialize($responseData, 'json'), Response::HTTP_OK, [], true);
+        $response = $this->json($responseData);
 
         $response->headers->setCookie(
             new Cookie(
@@ -120,13 +117,13 @@ class AuthController extends AbstractController
         try {
             $tokenData = $this->jwtEncoder->decode($refreshTokenRequest->getRefreshToken());
         } catch (JWTDecodeFailureException $e) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid refresh token'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if (!isset($tokenData['client_id']) || !isset($tokenData['role']) || !isset($tokenData['email'])) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid token data'
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -136,26 +133,26 @@ class AuthController extends AbstractController
         ]);
 
         if (!$refreshToken) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Refresh token not found'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($refreshToken->getInvalidationDate() < new DateTimeImmutable()) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Refresh token expired'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         if ($refreshToken->getRole() !== $roleName) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Invalid role'
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $user = $userRepository->find($tokenData['client_id']);
         if (!$user) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'User not found'
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -185,7 +182,7 @@ class AuthController extends AbstractController
         $responseData->setAccessToken($newAccessToken);
         $responseData->setRefreshToken($newRefreshToken);
 
-        $response = new JsonResponse($this->serializer->serialize($responseData, 'json'), Response::HTTP_OK, [], true);
+        $response = $this->json($responseData);
         
         $response->headers->setCookie(
             new Cookie(
@@ -239,12 +236,12 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            $response = new JsonResponse(['message' => 'Successfully logged out'], Response::HTTP_OK);
+            $response = $this->json(['message' => 'Successfully logged out']);
             $response->headers->clearCookie('access_token');
 
             return $response;
         } catch (\Exception $e) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Logout failed: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }

@@ -13,7 +13,7 @@ class Image
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $entityId = null;
 
     #[ORM\Column(type: 'string', length: 64)]
@@ -49,7 +49,7 @@ class Image
         return $this->entityId;
     }
 
-    public function setEntityId(int $entityId): self
+    public function setEntityId(?int $entityId): self
     {
         $this->entityId = $entityId;
         return $this;

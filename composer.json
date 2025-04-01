@@ -11,8 +11,10 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "lexik/jwt-authentication-bundle": "*",
+        "liip/imagine-bundle": "^2.13",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
+        "symfony/filesystem": "7.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.2.*",
         "symfony/monolog-bundle": "^3.10",
@@ -21,6 +23,7 @@
         "symfony/serializer": "7.2.*",
         "symfony/translation": "7.2.*",
         "symfony/translation-contracts": "*",
+        "symfony/uid": "7.2.*",
         "symfony/validator": "7.2.*",
         "symfony/yaml": "7.2.*"
     },

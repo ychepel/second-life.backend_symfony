@@ -6,6 +6,7 @@ use App\Entity\Location;
 use App\Repository\LocationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/v1')]
@@ -25,7 +26,7 @@ class LocationController extends AbstractController
             }, $locations)
         ];
 
-        return new JsonResponse($response);
+        return $this->json($response);
     }
 
     #[Route('/locations/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -34,12 +35,12 @@ class LocationController extends AbstractController
         $location = $locationRepository->find($id);
 
         if (!$location) {
-            return new JsonResponse([
+            return $this->json([
                 'error' => 'Location not found'
-            ], JsonResponse::HTTP_NOT_FOUND);
+            ], Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse([
+        return $this->json([
             'id' => $location->getId(),
             'name' => $location->getName()
         ]);

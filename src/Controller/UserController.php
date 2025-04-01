@@ -9,12 +9,10 @@ use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserController extends AbstractController
@@ -22,8 +20,7 @@ class UserController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly TranslatorInterface $translator,
-        private readonly SerializerInterface $serializer
+        private readonly TranslatorInterface $translator
     ) {}
 
     #[Route(path: 'api/v1/users/register', name: 'register', methods: ['POST'])]
@@ -72,12 +69,7 @@ class UserController extends AbstractController
             ->setLastActive($user->getCreatedAt())
             ->setImages($images);
 
-        return new JsonResponse(
-            $this->serializer->serialize($response, 'json', ['groups' => 'user:read']),
-            Response::HTTP_CREATED,
-            [],
-            true
-        );
+        return $this->json($response, Response::HTTP_CREATED);
     }
 
     private function createImages(array $baseNames, int $userId): array
