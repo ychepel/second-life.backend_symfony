@@ -3,9 +3,10 @@
 namespace App\Entity;
 
 use App\Enum\OfferStatus;
+use App\Repository\OfferRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: OfferRepository::class)]
 #[ORM\Table(name: 'offer')]
 class Offer
 {

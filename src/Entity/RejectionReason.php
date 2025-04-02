@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
+use App\Repository\RejectionReasonRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: RejectionReasonRepository::class)]
 #[ORM\Table(name: 'rejection_reasons')]
 class RejectionReason
 {
