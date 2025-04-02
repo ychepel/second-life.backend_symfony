@@ -3,15 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Image;
+use App\Entity\User;
+use App\Enum\UserRole;
 use App\Repository\ImageRepository;
 use App\Repository\OfferRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use Liip\ImagineBundle\Model\Binary;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,36 +31,23 @@ class ImageController extends AbstractController
     private const MAX_CATEGORY_IMAGES = 1;
     private const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
 
-    public function __construct(private readonly EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly Security $security
+    ) { }
 
     #[Route('/images', name: 'image_upload', methods: ['POST'])]
     public function uploadImage(
         Request $request,
         ImageRepository $imageRepository,
-        UserRepository $userRepository,
         OfferRepository $offerRepository,
-        JWTEncoderInterface $jwtEncoder,
         TranslatorInterface $translator,
         ValidatorInterface $validator,
         FilterManager $filterManager
     ): JsonResponse {
         try {
-            $accessToken = $request->cookies->get('access_token');
-            if (!$accessToken) {
-                return $this->json([
-                    'error' => $translator->trans('Access token not found')
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            $tokenData = $jwtEncoder->decode($accessToken);
-            $user = $userRepository->findOneBy(['email' => $tokenData['email']]);
-            if (!$user) {
-                return $this->json([
-                    'error' => $translator->trans('User not found')
-                ], Response::HTTP_UNAUTHORIZED);
-            }
+            /** @var User $user */
+            $user = $this->security->getUser();
 
             // Get request data
             $entityType = $request->request->get('entityType');
@@ -95,45 +82,47 @@ class ImageController extends AbstractController
             }
 
             // Check permissions and image limits
-            if ($entityType === 'offer' && $entityId !== null) {
-                $offer = $offerRepository->findOneBy(['id' => $entityId, 'user' => $user]);
-                if (!$offer) {
-                    return $this->json([
-                        'error' => $translator->trans('Access denied')
-                    ], Response::HTTP_FORBIDDEN);
-                }
+            if ($entityId !== null) {
+                if ($entityType === 'offer') {
+                    $offer = $offerRepository->findOneBy(['id' => $entityId, 'user' => $user]);
+                    if (!$offer) {
+                        return $this->json([
+                            'error' => $translator->trans('Access denied')
+                        ], Response::HTTP_FORBIDDEN);
+                    }
 
-                $offerImages = $imageRepository->findBy(['entityType' => 'offer', 'entityId' => $entityId]);
-                if (count($offerImages) >= self::MAX_OFFER_IMAGES) {
-                    return $this->json([
-                        'error' => $translator->trans('Maximum number of images reached')
-                    ], Response::HTTP_BAD_REQUEST);
-                }
-            } elseif ($entityType === 'user') {
-                if ($entityId !== $user->getId()) {
-                    return $this->json([
-                        'error' => $translator->trans('Access denied')
-                    ], Response::HTTP_FORBIDDEN);
-                }
+                    $offerImages = $imageRepository->findBy(['entityType' => 'offer', 'entityId' => $entityId]);
+                    if (count($offerImages) >= self::MAX_OFFER_IMAGES) {
+                        return $this->json([
+                            'error' => $translator->trans('Maximum number of images reached')
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
+                } elseif ($entityType === 'user') {
+                    if ($entityId !== $user->getId()) {
+                        return $this->json([
+                            'error' => $translator->trans('Access denied')
+                        ], Response::HTTP_FORBIDDEN);
+                    }
 
-                $userImages = $imageRepository->findBy(['entityType' => 'user', 'entityId' => $user->getId()]);
-                if (count($userImages) >= self::MAX_USER_IMAGES) {
-                    return $this->json([
-                        'error' => $translator->trans('Maximum number of images reached')
-                    ], Response::HTTP_BAD_REQUEST);
-                }
-            } elseif ($entityType === 'category') {
-                if ($tokenData['role'] !== 'admin') {
-                    return $this->json([
-                        'error' => $translator->trans('Access denied')
-                    ], Response::HTTP_FORBIDDEN);
-                }
+                    $userImages = $imageRepository->findBy(['entityType' => 'user', 'entityId' => $user->getId()]);
+                    if (count($userImages) >= self::MAX_USER_IMAGES) {
+                        return $this->json([
+                            'error' => $translator->trans('Maximum number of images reached')
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
+                } elseif ($entityType === 'category') {
+                    if ($user->getRole() !== UserRole::ROLE_ADMIN) {
+                        return $this->json([
+                            'error' => $translator->trans('Access denied')
+                        ], Response::HTTP_FORBIDDEN);
+                    }
 
-                $categoryImages = $imageRepository->findBy(['entityType' => 'category', 'entityId' => $entityId]);
-                if (count($categoryImages) >= self::MAX_CATEGORY_IMAGES) {
-                    return $this->json([
-                        'error' => $translator->trans('Maximum number of images reached')
-                    ], Response::HTTP_BAD_REQUEST);
+                    $categoryImages = $imageRepository->findBy(['entityType' => 'category', 'entityId' => $entityId]);
+                    if (count($categoryImages) >= self::MAX_CATEGORY_IMAGES) {
+                        return $this->json([
+                            'error' => $translator->trans('Maximum number of images reached')
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
                 }
             }
 
@@ -155,10 +144,6 @@ class ImageController extends AbstractController
             // Return response with image URLs
             return $this->json($response);
 
-        } catch (JWTDecodeFailureException $e) {
-            return $this->json([
-                'error' => $translator->trans('Invalid token')
-            ], Response::HTTP_UNAUTHORIZED);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => $translator->trans('Internal server error')
@@ -170,31 +155,15 @@ class ImageController extends AbstractController
     public function deleteImage(
         Request $request,
         ImageRepository $imageRepository,
-        UserRepository $userRepository,
         OfferRepository $offerRepository,
-        JWTEncoderInterface $jwtEncoder,
         TranslatorInterface $translator
     ): JsonResponse {
         try {
             //TODO: parse request to dto
             //$dto = $serializer->deserialize($request->getContent(), DeleteRequestDto::class, 'json');
 
-            // Get access token from cookies
-            $accessToken = $request->cookies->get('access_token');
-            if (!$accessToken) {
-                return $this->json([
-                    'error' => $translator->trans('Access token not found')
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Decode token and get user data
-            $tokenData = $jwtEncoder->decode($accessToken);
-            $user = $userRepository->findOneBy(['email' => $tokenData['email']]);
-            if (!$user) {
-                return $this->json([
-                    'error' => $translator->trans('User not found')
-                ], Response::HTTP_UNAUTHORIZED);
-            }
+            /** @var User $user */
+            $user = $this->security->getUser();
 
             // Get baseName from request
             $requestData = json_decode($request->getContent(), true);
@@ -228,7 +197,7 @@ class ImageController extends AbstractController
                     ], Response::HTTP_FORBIDDEN);
                 }
             } elseif ($image->getEntityType() === 'category') {
-                if ($tokenData['role'] !== 'admin') {
+                if ($user->getRole() !== UserRole::ROLE_ADMIN) {
                     return $this->json([
                         'error' => $translator->trans('Access denied')
                     ], Response::HTTP_FORBIDDEN);
@@ -246,10 +215,6 @@ class ImageController extends AbstractController
                 'message' => $translator->trans('Image deleted successfully')
             ]);
 
-        } catch (JWTDecodeFailureException $e) {
-            return $this->json([
-                'error' => $translator->trans('Invalid token')
-            ], Response::HTTP_UNAUTHORIZED);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => $translator->trans('Internal server error')

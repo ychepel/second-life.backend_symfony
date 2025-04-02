@@ -22,7 +22,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         
@@ -65,7 +65,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         
@@ -91,7 +91,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         
@@ -117,7 +117,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         
@@ -154,7 +154,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         
@@ -179,7 +179,7 @@ class AuthControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail(self::TEST_USER_DATA['email']);
         $user->setPassword($passwordHasher->hashPassword($user, self::TEST_USER_DATA['password']));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName(self::TEST_USER_DATA['firstName']);
         $user->setLastName(self::TEST_USER_DATA['lastName']);
         

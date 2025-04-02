@@ -6,11 +6,12 @@ use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
-class User implements PasswordAuthenticatedUserInterface
+class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,8 +33,8 @@ class User implements PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'string')]
-    private string $role = UserRole::USER->value;
+    #[ORM\Column(type: 'string', enumType: UserRole::class)]
+    private UserRole $role = UserRole::ROLE_USER;
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $createdAt = null;
@@ -134,12 +135,12 @@ class User implements PasswordAuthenticatedUserInterface
 
     public function getRole(): UserRole
     {
-        return UserRole::from($this->role);
+        return $this->role;
     }
 
     public function setRole(UserRole $role): self
     {
-        $this->role = $role->value;
+        $this->role = $role;
         return $this;
     }
 
@@ -151,5 +152,20 @@ class User implements PasswordAuthenticatedUserInterface
     public function setLocation(?Location $location): void
     {
         $this->location = $location;
+    }
+
+    public function getRoles(): array
+    {
+        return [$this->role->name];
+    }
+
+    public function eraseCredentials(): void
+    {
+
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return 'email';
     }
 }

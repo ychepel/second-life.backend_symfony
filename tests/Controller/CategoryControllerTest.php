@@ -36,7 +36,7 @@ class CategoryControllerTest extends ControllerTest
         $admin = new User();
         $admin->setEmail(self::TEST_ADMIN_DATA['email']);
         $admin->setPassword($passwordHasher->hashPassword($admin, self::TEST_ADMIN_DATA['password']));
-        $admin->setRole(UserRole::ADMIN);
+        $admin->setRole(UserRole::ROLE_ADMIN);
         $admin->setFirstName(self::TEST_ADMIN_DATA['firstName']);
         $admin->setLastName(self::TEST_ADMIN_DATA['lastName']);
         
@@ -155,9 +155,11 @@ class CategoryControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         // Get all categories
-        $response = $this->apiRequest('GET', '/api/v1/categories/get-all-for-admin');
+        $response = $this->apiRequest('GET', '/api/v1/categories/get-all-for-admin', accessToken: $accessToken);
+
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -184,7 +186,7 @@ class CategoryControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('Access token not found', $responseData['error']);
+        $this->assertEquals('JWT Token not found', $responseData['message']);
     }
 
     public function testGetAllCategoriesForAdminWithNonAdminUser(): void
@@ -195,7 +197,7 @@ class CategoryControllerTest extends ControllerTest
         $user = new User();
         $user->setEmail('user@example.com');
         $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
-        $user->setRole(UserRole::USER);
+        $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName('Regular');
         $user->setLastName('User');
         
@@ -210,12 +212,10 @@ class CategoryControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         // Try to get all categories
-        $response = $this->apiRequest('GET', '/api/v1/categories/get-all-for-admin');
+        $response = $this->apiRequest('GET', '/api/v1/categories/get-all-for-admin', accessToken: $accessToken);
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('Access denied', $responseData['error']);
     }
 }

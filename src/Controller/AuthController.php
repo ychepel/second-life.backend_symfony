@@ -6,19 +6,22 @@ use App\Dto\LoginRequest;
 use App\Dto\LoginResponse;
 use App\Dto\RefreshTokenRequest;
 use App\Entity\RefreshToken;
+use App\Entity\User;
 use App\Enum\UserRole;
+use App\Helper\MultiplyRolesExpression;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/v1/auth')]
 class AuthController extends AbstractController
@@ -39,6 +42,7 @@ class AuthController extends AbstractController
         string $roleName,
         UserRepository $userRepository
     ): Response {
+        /** @var User $user */
         $user = $userRepository->findOneBy(['email' => $loginRequest->getEmail()]);
 
         if (!$user) {
@@ -65,10 +69,9 @@ class AuthController extends AbstractController
         $refreshTokenExpiration = $now->modify('+' . self::REFRESH_TOKEN_EXPIRATION_DAYS . ' days');
 
         $tokenData = [
-            'client_id' => $user->getId(),
-            'role' => $user->getRole()->value,
-            'email' => $user->getEmail(),
-            'exp' => $accessTokenExpiration->getTimestamp()
+            'user_id' => $user->getId(),
+            'role' => $user->getRole()->name,
+            'username' => $user->getEmail()
         ];
 
         $refreshToken = $this->jwtEncoder->encode($tokenData);
@@ -122,7 +125,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if (!isset($tokenData['client_id']) || !isset($tokenData['role']) || !isset($tokenData['email'])) {
+        if (!isset($tokenData['user_id']) || !isset($tokenData['role']) || !isset($tokenData['username'])) {
             return $this->json([
                 'error' => 'Invalid token data'
             ], Response::HTTP_BAD_REQUEST);
@@ -150,7 +153,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $user = $userRepository->find($tokenData['client_id']);
+        $user = $userRepository->find($tokenData['user_id']);
         if (!$user) {
             return $this->json([
                 'error' => 'User not found'
@@ -158,14 +161,14 @@ class AuthController extends AbstractController
         }
 
         $now = new DateTimeImmutable();
+        //TODO: make token contents different and check expiration dates
         $accessTokenExpiration = $now->modify('+' . self::ACCESS_TOKEN_EXPIRATION_DAYS . ' days');
         $refreshTokenExpiration = $now->modify('+' . self::REFRESH_TOKEN_EXPIRATION_DAYS . ' days');
 
         $newTokenData = [
-            'client_id' => $user->getId(),
-            'role' => $user->getRole()->value,
-            'email' => $user->getEmail(),
-            'exp' => $accessTokenExpiration->getTimestamp()
+            'user_id' => $user->getId(),
+            'role' => $user->getRole(),
+            'username' => $user->getEmail()
         ];
 
         $newRefreshToken = $this->jwtEncoder->encode($newTokenData);
@@ -202,33 +205,19 @@ class AuthController extends AbstractController
     }
 
     #[Route('/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
-    public function logout(
-        Request $request,
-        string $roleName,
-        UserRepository $userRepository
-    ): Response {
+    #[IsGranted(new MultiplyRolesExpression(UserRole::ROLE_USER, UserRole::ROLE_ADMIN))]
+    public function logout(string $roleName, Security $security): Response
+    {
         try {
-            $accessToken = $request->cookies->get('access_token');
-            if (!$accessToken) {
-                throw new \Exception('Access token not found in cookies');
-            }
-
-            $tokenData = $this->jwtEncoder->decode($accessToken);
-            if (!isset($tokenData['client_id']) || !isset($tokenData['email'])) {
-                throw new \Exception('Invalid token data');
-            }
-
-            $user = $userRepository->find($tokenData['client_id']);
-            if (!$user) {
-                throw new \Exception('User not found');
-            }
+            /** @var User $user */
+            $user = $security->getUser();
 
             if ($user->getRole() !== UserRole::from($roleName)) {
                 throw new \Exception('Invalid role');
             }
 
             $refreshToken = $this->entityManager->getRepository(RefreshToken::class)->findOneBy([
-                'email' => $tokenData['email']
+                'email' => $user->getEmail()
             ]);
 
             if ($refreshToken) {

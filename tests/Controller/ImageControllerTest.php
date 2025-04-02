@@ -58,21 +58,21 @@ class ImageControllerTest extends ControllerTest
         $user1 = new User();
         $user1->setEmail(self::TEST_USER1_DATA['email']);
         $user1->setPassword($passwordHasher->hashPassword($user1, self::TEST_USER1_DATA['password']));
-        $user1->setRole(UserRole::USER);
+        $user1->setRole(UserRole::ROLE_USER);
         $user1->setFirstName(self::TEST_USER1_DATA['firstName']);
         $user1->setLastName(self::TEST_USER1_DATA['lastName']);
 
         $user2 = new User();
         $user2->setEmail(self::TEST_USER2_DATA['email']);
         $user2->setPassword($passwordHasher->hashPassword($user1, self::TEST_USER2_DATA['password']));
-        $user2->setRole(UserRole::USER);
+        $user2->setRole(UserRole::ROLE_USER);
         $user2->setFirstName(self::TEST_USER2_DATA['firstName']);
         $user2->setLastName(self::TEST_USER2_DATA['lastName']);
 
         $admin = new User();
         $admin->setEmail(self::TEST_ADMIN_DATA['email']);
         $admin->setPassword($passwordHasher->hashPassword($admin, self::TEST_ADMIN_DATA['password']));
-        $admin->setRole(UserRole::ADMIN);
+        $admin->setRole(UserRole::ROLE_ADMIN);
         $admin->setFirstName(self::TEST_ADMIN_DATA['firstName']);
         $admin->setLastName(self::TEST_ADMIN_DATA['lastName']);
 
@@ -119,6 +119,7 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $offer = $this->entityManager->getRepository(Offer::class)->findOneBy([
             'user' => $this->entityManager->getRepository(User::class)->findOneBy([
@@ -130,7 +131,7 @@ class ImageControllerTest extends ControllerTest
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'offer',
             'entityId' => $offer->getId()
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
@@ -165,12 +166,13 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $file = $this->createTestFile();
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'invalid',
             'entityId' => 1
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
@@ -187,6 +189,7 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $file = new \SplFileInfo(__DIR__ . '/fixtures/large.jpg');
         $file = new UploadedFile(
@@ -199,7 +202,7 @@ class ImageControllerTest extends ControllerTest
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'offer',
             'entityId' => null
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
@@ -213,6 +216,7 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $offer = $this->entityManager->getRepository(Offer::class)->findOneBy([
             'user' => $this->entityManager->getRepository(User::class)->findOneBy([
@@ -225,14 +229,14 @@ class ImageControllerTest extends ControllerTest
             $this->apiRequest('POST', '/api/v1/images', [
                 'entityType' => 'offer',
                 'entityId' => $offer->getId()
-            ], ['file' => $file]);
+            ], ['file' => $file], accessToken: $accessToken);
         }
 
         $file = $this->createTestFile();
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'offer',
             'entityId' => $offer->getId()
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
@@ -248,16 +252,15 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $file = $this->createTestFile();
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'category',
             'entityId' => 1
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('Access denied', $responseData['error']);
     }
 
     public function testDeleteImageSuccess(): void
@@ -269,6 +272,7 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
 
         $offer = $this->entityManager->getRepository(Offer::class)->findOneBy([
             'user' => $this->entityManager->getRepository(User::class)->findOneBy([
@@ -281,14 +285,14 @@ class ImageControllerTest extends ControllerTest
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'offer',
             'entityId' => $offer->getId(),
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken);
 
         $responseData = json_decode($response->getContent(), true);
         $baseName = key($responseData['values']);
 
         $response = $this->apiRequest('DELETE', '/api/v1/images', [
             'baseName' => $baseName
-        ]);
+        ], accessToken: $accessToken);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
     }
@@ -302,6 +306,7 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse1 = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest1);
         $loginData1 = json_decode($loginResponse1->getContent(), true);
+        $accessToken1 = $loginData1['accessToken'];
 
         $user1 = $this->entityManager->getRepository(User::class)->findOneBy([
             'email' => self::TEST_USER1_DATA['email']
@@ -314,7 +319,7 @@ class ImageControllerTest extends ControllerTest
         $response = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'offer',
             'entityId' => $offer->getId()
-        ], ['file' => $file]);
+        ], ['file' => $file], accessToken: $accessToken1);
 
         $responseData = json_decode($response->getContent(), true);
         $baseName = key($responseData['values']);
@@ -326,10 +331,11 @@ class ImageControllerTest extends ControllerTest
 
         $loginResponse2 = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest2);
         $loginData2 = json_decode($loginResponse2->getContent(), true);
+        $accessToken2 = $loginData2['accessToken'];
 
         $response = $this->apiRequest('DELETE', '/api/v1/images', [
             'baseName' => $baseName
-        ]);
+        ], accessToken: $accessToken2);
 
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);

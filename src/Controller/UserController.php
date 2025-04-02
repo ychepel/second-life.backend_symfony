@@ -15,6 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[Route('/api/v1')]
 class UserController extends AbstractController
 {
     public function __construct(
@@ -23,7 +24,7 @@ class UserController extends AbstractController
         private readonly TranslatorInterface $translator
     ) {}
 
-    #[Route(path: 'api/v1/users/register', name: 'register', methods: ['POST'])]
+    #[Route(path: '/users/register', name: 'register', methods: ['POST'])]
     public function register(#[MapRequestPayload] UserRegistrationRequest $request): Response
     {
         // Check if email already exists
@@ -42,7 +43,7 @@ class UserController extends AbstractController
         $user->setEmail($request->getEmail())
             ->setFirstName($request->getFirstName())
             ->setLastName($request->getLastName())
-            ->setRole(UserRole::USER)
+            ->setRole(UserRole::ROLE_USER)
             ->setCreatedAt(new \DateTime())
             ->setUpdatedAt(new \DateTime())
             ->setIsActive(true);

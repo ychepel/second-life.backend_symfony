@@ -33,9 +33,12 @@ abstract class ControllerTest extends WebTestCase
         unset($this->entityManager);
     }
 
-    protected function apiRequest(string $method, string $url, array $data = [], array $files = []): Response
+    protected function apiRequest(string $method, string $url, array $data = [], array $files = [], string $accessToken = ''): Response
     {
         $server = ['HTTP_ACCEPT' => 'application/json'];
+        if ($accessToken !== '') {
+            $server['HTTP_AUTHORIZATION'] = 'Bearer ' . $accessToken;
+        }
         $content = null;
 
         if (empty($files)) {

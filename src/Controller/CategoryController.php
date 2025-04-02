@@ -4,13 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/v1')]
 class CategoryController extends AbstractController
@@ -62,28 +60,11 @@ class CategoryController extends AbstractController
     }
 
     #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function getAllCategoriesForAdmin(
-        Request $request,
-        CategoryRepository $categoryRepository,
-        JWTEncoderInterface $jwtEncoder
+        CategoryRepository $categoryRepository
     ): JsonResponse {
         try {
-            // Get access token from cookies
-            $accessToken = $request->cookies->get('access_token');
-            if (!$accessToken) {
-                return $this->json([
-                    'error' => 'Access token not found'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            // Decode token and verify role
-            $tokenData = $jwtEncoder->decode($accessToken);
-            if (!isset($tokenData['role']) || $tokenData['role'] !== 'admin') {
-                return $this->json([
-                    'error' => 'Access denied'
-                ], Response::HTTP_FORBIDDEN);
-            }
-
             $categories = $categoryRepository->findAll();
 
             $response = [
@@ -101,10 +82,6 @@ class CategoryController extends AbstractController
             ];
 
             return $this->json($response);
-        } catch (JWTDecodeFailureException $e) {
-            return $this->json([
-                'error' => 'Invalid token'
-            ], Response::HTTP_UNAUTHORIZED);
         } catch (\Exception $e) {
             return $this->json([
                 'error' => 'Internal server error'
