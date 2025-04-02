@@ -4,8 +4,8 @@ namespace App\Tests\Controller;
 
 use App\Entity\Category;
 use App\Entity\Offer;
-use App\Entity\Status;
 use App\Entity\User;
+use App\Enum\OfferStatus;
 use App\Enum\UserRole;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -76,9 +76,6 @@ class ImageControllerTest extends ControllerTest
         $admin->setFirstName(self::TEST_ADMIN_DATA['firstName']);
         $admin->setLastName(self::TEST_ADMIN_DATA['lastName']);
 
-        $status = new Status();
-        $status->setName('Basic status');
-
         $category = new Category();
         $category->setName('Basic category');
         $category->setIsActive(true);
@@ -86,19 +83,18 @@ class ImageControllerTest extends ControllerTest
         $this->entityManager->persist($user1);
         $this->entityManager->persist($user2);
         $this->entityManager->persist($admin);
-        $this->entityManager->persist($status);
         $this->entityManager->persist($category);
         $this->entityManager->flush();
 
-        $offer1 = new Offer();
-        $offer1->setTitle('Test Offer');
-        $offer1->setDescription('Test Description');
-        $offer1->setAuctionDurationDays(3);
-        $offer1->setStatus($status);
-        $offer1->setCategory($category);
-        $offer1->setUser($user1);
+        $offer = new Offer();
+        $offer->setTitle('Test Offer');
+        $offer->setDescription('Test Description');
+        $offer->setAuctionDurationDays(3);
+        $offer->setStatus(OfferStatus::DRAFT);
+        $offer->setCategory($category);
+        $offer->setUser($user1);
 
-        $this->entityManager->persist($offer1);
+        $this->entityManager->persist($offer);
         $this->entityManager->flush();
     }
 

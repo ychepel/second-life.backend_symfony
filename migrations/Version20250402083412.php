@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250330204048 extends AbstractMigration
+final class Version20250402083412 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -30,7 +30,7 @@ final class Version20250330204048 extends AbstractMigration
             CREATE TABLE confirmation_code (id INT AUTO_INCREMENT NOT NULL, code VARCHAR(36) NOT NULL, expired DATETIME NOT NULL, user_id BIGINT NOT NULL, UNIQUE INDEX UNIQ_A0E239DE77153098 (code), INDEX IDX_A0E239DEA76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE image (id INT AUTO_INCREMENT NOT NULL, entity_id INT NOT NULL, entity_type VARCHAR(64) NOT NULL, size VARCHAR(64) NOT NULL, base_name VARCHAR(64) NOT NULL, full_path VARCHAR(256) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
+            CREATE TABLE image (id INT AUTO_INCREMENT NOT NULL, entity_id INT DEFAULT NULL, entity_type VARCHAR(64) NOT NULL, size VARCHAR(64) NOT NULL, base_name VARCHAR(64) NOT NULL, full_path VARCHAR(256) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE location (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(64) NOT NULL, UNIQUE INDEX UNIQ_5E9E89CB5E237E06 (name), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
@@ -39,16 +39,16 @@ final class Version20250330204048 extends AbstractMigration
             CREATE TABLE notification (id INT AUTO_INCREMENT NOT NULL, authenticated_user_id INT NOT NULL, receiver_role VARCHAR(20) NOT NULL, context_id INT DEFAULT NULL, notification_type VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, sent_at DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE offer (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(64) NOT NULL, description LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL, auction_duration_days INT NOT NULL, start_price NUMERIC(7, 2) DEFAULT NULL, win_bid NUMERIC(7, 2) DEFAULT NULL, is_free TINYINT(1) NOT NULL, auction_finished_at DATETIME DEFAULT NULL, updated_at DATETIME DEFAULT NULL, user_id BIGINT NOT NULL, status_id INT NOT NULL, category_id INT NOT NULL, winner_bid_id INT DEFAULT NULL, location_id INT DEFAULT NULL, INDEX IDX_29D6873EA76ED395 (user_id), INDEX IDX_29D6873E6BF700BD (status_id), INDEX IDX_29D6873E12469DE2 (category_id), INDEX IDX_29D6873E61C2EF79 (winner_bid_id), INDEX IDX_29D6873E64D218E (location_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
+            CREATE TABLE offer (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(64) NOT NULL, description LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL, auction_duration_days INT NOT NULL, start_price NUMERIC(7, 2) DEFAULT NULL, win_bid NUMERIC(7, 2) DEFAULT NULL, is_free TINYINT(1) NOT NULL, status INT NOT NULL, auction_finished_at DATETIME DEFAULT NULL, updated_at DATETIME DEFAULT NULL, user_id BIGINT NOT NULL, category_id INT NOT NULL, winner_bid_id INT DEFAULT NULL, location_id INT DEFAULT NULL, INDEX IDX_29D6873EA76ED395 (user_id), INDEX IDX_29D6873E12469DE2 (category_id), INDEX IDX_29D6873E61C2EF79 (winner_bid_id), INDEX IDX_29D6873E64D218E (location_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE offer_status_history (id INT AUTO_INCREMENT NOT NULL, offer_id INT NOT NULL, created_at DATETIME NOT NULL, status_id INT NOT NULL, rejection_reason_id INT DEFAULT NULL, INDEX IDX_B8E48A156BF700BD (status_id), INDEX IDX_B8E48A1551BD4E15 (rejection_reason_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
+            CREATE TABLE offer_status_history (id INT AUTO_INCREMENT NOT NULL, offer_id INT NOT NULL, status INT NOT NULL, created_at DATETIME NOT NULL, rejection_reason_id INT DEFAULT NULL, INDEX IDX_B8E48A1551BD4E15 (rejection_reason_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE refresh_tokens (id INT AUTO_INCREMENT NOT NULL, token VARCHAR(600) NOT NULL, invalidation_date DATETIME NOT NULL, email VARCHAR(255) NOT NULL, role VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_9BACE7E15F37A13B (token), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE rejection_reasons (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(64) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
-        SQL);
-        $this->addSql(<<<'SQL'
-            CREATE TABLE status (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(64) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE users (id BIGINT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, password VARCHAR(60) NOT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL, role VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, location_id INT DEFAULT NULL, UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email), UNIQUE INDEX UNIQ_1483A5E935C246D5 (password), INDEX IDX_1483A5E964D218E (location_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`
@@ -66,9 +66,6 @@ final class Version20250330204048 extends AbstractMigration
             ALTER TABLE offer ADD CONSTRAINT FK_29D6873EA76ED395 FOREIGN KEY (user_id) REFERENCES users (id)
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE offer ADD CONSTRAINT FK_29D6873E6BF700BD FOREIGN KEY (status_id) REFERENCES status (id)
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE offer ADD CONSTRAINT FK_29D6873E12469DE2 FOREIGN KEY (category_id) REFERENCES category (id)
         SQL);
         $this->addSql(<<<'SQL'
@@ -76,9 +73,6 @@ final class Version20250330204048 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE offer ADD CONSTRAINT FK_29D6873E64D218E FOREIGN KEY (location_id) REFERENCES location (id) ON DELETE SET NULL
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE offer_status_history ADD CONSTRAINT FK_B8E48A156BF700BD FOREIGN KEY (status_id) REFERENCES status (id)
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE offer_status_history ADD CONSTRAINT FK_B8E48A1551BD4E15 FOREIGN KEY (rejection_reason_id) REFERENCES rejection_reasons (id) ON DELETE SET NULL
@@ -104,9 +98,6 @@ final class Version20250330204048 extends AbstractMigration
             ALTER TABLE offer DROP FOREIGN KEY FK_29D6873EA76ED395
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE offer DROP FOREIGN KEY FK_29D6873E6BF700BD
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE offer DROP FOREIGN KEY FK_29D6873E12469DE2
         SQL);
         $this->addSql(<<<'SQL'
@@ -114,9 +105,6 @@ final class Version20250330204048 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE offer DROP FOREIGN KEY FK_29D6873E64D218E
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE offer_status_history DROP FOREIGN KEY FK_B8E48A156BF700BD
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE offer_status_history DROP FOREIGN KEY FK_B8E48A1551BD4E15
@@ -149,10 +137,10 @@ final class Version20250330204048 extends AbstractMigration
             DROP TABLE offer_status_history
         SQL);
         $this->addSql(<<<'SQL'
-            DROP TABLE rejection_reasons
+            DROP TABLE refresh_tokens
         SQL);
         $this->addSql(<<<'SQL'
-            DROP TABLE status
+            DROP TABLE rejection_reasons
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE users
