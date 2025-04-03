@@ -4,7 +4,7 @@ namespace App\Dto;
 
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class UserRegistrationResponse
+class UserResponseDto
 {
     #[Groups(['user:read'])]
     private int $id;

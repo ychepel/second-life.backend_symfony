@@ -2,7 +2,7 @@
 
 namespace App\Dto;
 
-class LoginResponse
+class LoginResponseDto
 {
     private int $clientId;
     private string $accessToken;

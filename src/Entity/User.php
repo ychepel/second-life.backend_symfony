@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Interface\EntityWithImage;
 use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,12 +12,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
-class User implements PasswordAuthenticatedUserInterface, UserInterface
+class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityWithImage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'bigint')]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private ?string $email = null;
@@ -51,7 +52,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         $this->updatedAt = new \DateTime();
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -126,6 +127,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         return $this->updatedAt;
     }
 
+    //TODO: use autofilling for all Entities timestamps
     #[ORM\PreUpdate]
     public function setUpdatedAt(?\DateTime $updatedAt): self
     {

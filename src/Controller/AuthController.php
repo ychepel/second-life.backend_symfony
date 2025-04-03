@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Dto\LoginRequest;
-use App\Dto\LoginResponse;
-use App\Dto\RefreshTokenRequest;
+use App\Dto\LoginRequestDto;
+use App\Dto\LoginResponseDto;
+use App\Dto\RefreshTokenRequestDto;
 use App\Entity\RefreshToken;
 use App\Entity\User;
 use App\Enum\UserRole;
@@ -38,9 +38,9 @@ class AuthController extends AbstractController
 
     #[Route('/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function login(
-        #[MapRequestPayload] LoginRequest $loginRequest,
-        string $roleName,
-        UserRepository $userRepository
+        #[MapRequestPayload] LoginRequestDto $loginRequest,
+        string                               $roleName,
+        UserRepository                       $userRepository
     ): Response {
         /** @var User $user */
         $user = $userRepository->findOneBy(['email' => $loginRequest->getEmail()]);
@@ -87,7 +87,7 @@ class AuthController extends AbstractController
 
         $accessToken = $this->jwtEncoder->encode($tokenData);
 
-        $responseData = new LoginResponse();
+        $responseData = new LoginResponseDto();
         $responseData->setClientId($user->getId());
         $responseData->setAccessToken($accessToken);
         $responseData->setRefreshToken($refreshToken);
@@ -113,9 +113,9 @@ class AuthController extends AbstractController
 
     #[Route('/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function refreshAccessToken(
-        #[MapRequestPayload] RefreshTokenRequest $refreshTokenRequest,
-        string $roleName,
-        UserRepository $userRepository
+        #[MapRequestPayload] RefreshTokenRequestDto $refreshTokenRequest,
+        string                                      $roleName,
+        UserRepository                              $userRepository
     ): Response {
         try {
             $tokenData = $this->jwtEncoder->decode($refreshTokenRequest->getRefreshToken());
@@ -180,7 +180,7 @@ class AuthController extends AbstractController
 
         $newAccessToken = $this->jwtEncoder->encode($newTokenData);
 
-        $responseData = new LoginResponse();
+        $responseData = new LoginResponseDto();
         $responseData->setClientId($user->getId());
         $responseData->setAccessToken($newAccessToken);
         $responseData->setRefreshToken($newRefreshToken);

@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
 #[ORM\Table(name: 'image')]
+#[ORM\HasLifecycleCallbacks]
 class Image
 {
     #[ORM\Id]
@@ -116,6 +117,7 @@ class Image
         return $this->updatedAt;
     }
 
+    #[ORM\PreUpdate]
     public function setUpdatedAt(\DateTime $updatedAt): self
     {
         $this->updatedAt = $updatedAt;

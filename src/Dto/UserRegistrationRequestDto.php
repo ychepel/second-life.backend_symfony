@@ -3,8 +3,9 @@
 namespace App\Dto;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator as AppAssert;
 
-class UserRegistrationRequest
+class UserRegistrationRequestDto
 {
     #[Assert\All([
         new Assert\NotBlank(),
@@ -22,6 +23,7 @@ class UserRegistrationRequest
 
     #[Assert\NotBlank]
     #[Assert\Email]
+    #[AppAssert\UniqueUserEmail]
     private string $email;
 
     #[Assert\NotBlank]
@@ -98,4 +100,16 @@ class UserRegistrationRequest
         $this->password = $password;
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return sprintf('UserRegistrationRequestDto { baseNameOfImages: %s, firstName: %s, lastName: %s, email: %s }',
+            implode(', ', $this->baseNameOfImages),
+            $this->firstName,
+            $this->lastName,
+            $this->email
+        );
+    }
+
+
 }
