@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\RejectionReason;
-use App\Repository\RejectionReasonRepository;
+use App\Service\RejectionReasonService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,23 +16,16 @@ class RejectionReasonController extends AbstractController
     #[Route('/rejection-reasons', name: 'rejection_reasons', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function getRejectionReasons(
-        RejectionReasonRepository $rejectionReasonRepository
+        RejectionReasonService $rejectionReasonService,
+        LoggerInterface $logger
     ): JsonResponse {
         try {
-            // Get all rejection reasons
-            $reasons = $rejectionReasonRepository->findAll();
+            $reasons = $rejectionReasonService->getAll();
 
-            $response = [
-                'reasons' => array_map(function (RejectionReason $reason) {
-                    return [
-                        'id' => $reason->getId(),
-                        'name' => $reason->getName()
-                    ];
-                }, $reasons)
-            ];
-
-            return $this->json($response);
+            return $this->json(['reasons' => $reasons]);
         } catch (\Exception $e) {
+            $logger->error('Error getting rejection reasons: ' . $e->getMessage());
+
             return $this->json([
                 'error' => 'Internal server error'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);

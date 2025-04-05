@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
+use App\Entity\Interface\EntityWithImage;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ORM\Table(name: 'category')]
-class Category
+class Category implements EntityWithImage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,7 +24,7 @@ class Category
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }

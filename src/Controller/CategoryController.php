@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Category;
-use App\Repository\CategoryRepository;
+use App\Service\CategoryService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,97 +13,61 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api/v1')]
 class CategoryController extends AbstractController
 {
-    #[Route('/categories/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function getCategory(int $id, CategoryRepository $categoryRepository): JsonResponse
-    {
-        $category = $categoryRepository->findOneBy(['id' => $id, 'isActive' => true]);
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly CategoryService $categoryService
+    ) { }
 
-        if (!$category) {
+    #[Route('/categories/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getCategory(int $id): JsonResponse
+    {
+        try {
+            $categoryDto = $this->categoryService->getActiveById($id);
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting category: ' . $e->getMessage());
+
             return $this->json([
-                'error' => 'Category not found'
-            ], Response::HTTP_NOT_FOUND);
+                'error' => 'Internal server error'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $response = [
-            'images' => [
-                'values' => $this->formatImages($category->getImages())
-            ],
-            'id' => $category->getId(),
-            'name' => $category->getName(),
-            'description' => $category->getDescription(),
-            'active' => $category->isActive()
-        ];
+        if ($categoryDto === null) {
+            return $this->json(['error' => 'Category not found'], Response::HTTP_NOT_FOUND);
+        }
 
-        return $this->json($response);
+        return $this->json($categoryDto);
     }
 
     #[Route('/categories', name: 'categories_list', methods: ['GET'])]
-    public function getCategories(CategoryRepository $categoryRepository): JsonResponse
+    public function getCategories(): JsonResponse
     {
-        $categories = $categoryRepository->findBy(['isActive' => true]);
-
-        $response = [
-            'categories' => array_map(function (Category $category) {
-                return [
-                    'images' => [
-                        'values' => $this->formatImages($category->getImages())
-                    ],
-                    'id' => $category->getId(),
-                    'name' => $category->getName(),
-                    'description' => $category->getDescription(),
-                    'active' => $category->isActive()
-                ];
-            }, $categories)
-        ];
-
-        return $this->json($response);
-    }
-
-    #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function getAllCategoriesForAdmin(
-        CategoryRepository $categoryRepository
-    ): JsonResponse {
         try {
-            $categories = $categoryRepository->findAll();
+            $categories = $this->categoryService->getAll();
 
-            $response = [
-                'categories' => array_map(function (Category $category) {
-                    return [
-                        'images' => [
-                            'values' => $this->formatImages($category->getImages())
-                        ],
-                        'id' => $category->getId(),
-                        'name' => $category->getName(),
-                        'description' => $category->getDescription(),
-                        'active' => $category->isActive()
-                    ];
-                }, $categories)
-            ];
-
-            return $this->json($response);
+            return $this->json(['categories' => $categories]);
         } catch (\Exception $e) {
+            $this->logger->error('Error getting categories: ' . $e->getMessage());
+
             return $this->json([
                 'error' => 'Internal server error'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    private function formatImages(?array $images): array
+    #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function getAllCategoriesForAdmin(): JsonResponse
     {
-        if (!$images) {
-            return [];
-        }
+        try {
+            $categories = $this->categoryService->getAll(false);
 
-        $formattedImages = [];
-        foreach ($images as $imageId => $imageData) {
-            $formattedImages[$imageId] = [
-                '1024x1024' => sprintf('https://domain.com/prod/offer/1/1024x1024_%s.jpg', $imageId),
-                '320x320' => sprintf('https://domain.com/prod/offer/1/320x320_%s.jpg', $imageId),
-                '64x64' => sprintf('https://domain.com/prod/offer/1/64x64_%s.jpg', $imageId)
-            ];
-        }
+            return $this->json(['categories' => $categories]);
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting categories: ' . $e->getMessage());
 
-        return $formattedImages;
+            return $this->json([
+                'error' => 'Internal server error'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

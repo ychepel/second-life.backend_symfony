@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Location;
-use App\Repository\LocationRepository;
+use App\Service\LocationService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,37 +12,44 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/v1')]
 class LocationController extends AbstractController
 {
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly LocationService $locationService
+    ) { }
+
     #[Route('/locations', name: 'locations_list', methods: ['GET'])]
-    public function getLocations(LocationRepository $locationRepository): JsonResponse
+    public function getLocations(): JsonResponse
     {
-        $locations = $locationRepository->findAll();
+        try {
+            $locations = $this->locationService->getAll();
 
-        $response = [
-            'locations' => array_map(function (Location $location) {
-                return [
-                    'id' => $location->getId(),
-                    'name' => $location->getName()
-                ];
-            }, $locations)
-        ];
+            return $this->json(['locations' => $locations]);
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting locations: ' . $e->getMessage());
 
-        return $this->json($response);
+            return $this->json([
+                'error' => 'Internal server error'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/locations/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function getLocation(int $id, LocationRepository $locationRepository): JsonResponse
+    public function getLocation(int $id): JsonResponse
     {
-        $location = $locationRepository->find($id);
+        try {
+            $locationDto = $this->locationService->getById($id);
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting location: ' . $e->getMessage());
 
-        if (!$location) {
             return $this->json([
-                'error' => 'Location not found'
-            ], Response::HTTP_NOT_FOUND);
+                'error' => 'Internal server error'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        return $this->json([
-            'id' => $location->getId(),
-            'name' => $location->getName()
-        ]);
+        if ($locationDto === null) {
+            return $this->json(['error' => 'Location not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($locationDto);
     }
 }
