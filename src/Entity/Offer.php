@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Entity\Interface\EntityWithImage;
 use App\Enum\OfferStatus;
 use App\Repository\OfferRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OfferRepository::class)]
 #[ORM\Table(name: 'offer')]
-class Offer
+class Offer implements EntityWithImage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -60,6 +61,8 @@ class Offer
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTime $updatedAt = null;
+
+    private array $images = [];
 
     public function __construct()
     {
@@ -223,5 +226,15 @@ class Offer
     {
         $this->updatedAt = $updatedAt;
         return $this;
+    }
+
+    public function getImages(): array
+    {
+        return $this->images;
+    }
+
+    public function setImages(array $images): array
+    {
+        return $this->images = $images;
     }
 }

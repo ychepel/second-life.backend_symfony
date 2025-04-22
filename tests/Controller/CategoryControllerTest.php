@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Category;
+use App\Entity\Image;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -47,31 +48,17 @@ class CategoryControllerTest extends ControllerTest
             [
                 'name' => 'Electronics and gadgets',
                 'description' => 'Smartphones,Laptops,Televisions,Peripherals',
-                'active' => true,
-                'images' => [
-                    '47424034-00e8-4358-b352-e16023279883' => [
-                        '1024x1024' => 'https://domain.com/prod/offer/1/1024x1024_47424034-00e8-4358-b352-e16023279883.jpg',
-                        '320x320' => 'https://domain.com/prod/offer/1/320x320_47424034-00e8-4358-b352-e16023279883.jpg',
-                        '64x64' => 'https://domain.com/prod/offer/1/64x64_47424034-00e8-4358-b352-e16023279883.jpg'
-                    ],
-                    'a1b2c3d4-e5f6-7890-1234-56789abcdef0' => [
-                        '1024x1024' => 'https://domain.com/prod/offer/1/1024x1024_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg',
-                        '320x320' => 'https://domain.com/prod/offer/1/320x320_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg',
-                        '64x64' => 'https://domain.com/prod/offer/1/64x64_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
-                    ]
-                ]
+                'active' => true
             ],
             [
                 'name' => 'Furniture and Home Decor',
                 'description' => 'Sofas,Tables and Chairs,Cabinets and Shelves,Decor and Accessories',
-                'active' => true,
-                'images' => []
+                'active' => true
             ],
             [
                 'name' => 'Inactive Category',
                 'description' => 'This category is inactive',
-                'active' => false,
-                'images' => []
+                'active' => false
             ]
         ];
 
@@ -80,8 +67,49 @@ class CategoryControllerTest extends ControllerTest
             $category->setName($categoryData['name']);
             $category->setDescription($categoryData['description']);
             $category->setIsActive($categoryData['active']);
-            $category->setImages($categoryData['images']);
             $this->entityManager->persist($category);
+        }
+
+        $images = [
+            [
+                'baseName' => '47424034-00e8-4358-b352-e16023279883',
+                'size' => '1024x1024',
+                'fullPath' => '/category/1024x1024_47424034-00e8-4358-b352-e16023279883.jpg'
+            ],
+            [
+                'baseName' => '47424034-00e8-4358-b352-e16023279883',
+                'size' => '320x320',
+                'fullPath' => '/category/320x320_47424034-00e8-4358-b352-e16023279883.jpg'
+            ],
+            [
+                'baseName' => '47424034-00e8-4358-b352-e16023279883',
+                'size' => '64x64',
+                'fullPath' => '/category/64x64_47424034-00e8-4358-b352-e16023279883.jpg'
+            ],
+            [
+                'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
+                'size' => '1024x1024',
+                'fullPath' => '/category/1024x1024_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
+            ],
+            [
+                'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
+                'size' => '320x320',
+                'fullPath' => '/category/320x320_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
+            ],
+            [
+                'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
+                'size' => '64x64',
+                'fullPath' => '/category/64x64_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
+            ]
+        ];
+        foreach ($images as $imageData) {
+            $image = new Image();
+            $image->setEntityType('category');
+            $image->setEntityId(1);
+            $image->setBaseName($imageData['baseName']);
+            $image->setSize($imageData['size']);
+            $image->setFullPath($imageData['fullPath']);
+            $this->entityManager->persist($image);
         }
 
         $this->entityManager->flush();
@@ -96,8 +124,7 @@ class CategoryControllerTest extends ControllerTest
         
         $this->assertArrayHasKey('images', $responseData);
         $this->assertArrayHasKey('values', $responseData['images']);
-        //TODO: enable assertion after images logic implementation
-//        $this->assertArrayHasKey('47424034-00e8-4358-b352-e16023279883', $responseData['images']['values']);
+        $this->assertArrayHasKey('47424034-00e8-4358-b352-e16023279883', $responseData['images']['values']);
         $this->assertEquals('Electronics and gadgets', $responseData['name']);
         $this->assertEquals('Smartphones,Laptops,Televisions,Peripherals', $responseData['description']);
         $this->assertTrue($responseData['active']);
@@ -127,13 +154,13 @@ class CategoryControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('categories', $responseData);
         $this->assertIsArray($responseData['categories']);
-        
+
         $categories = $responseData['categories'];
         $this->assertCount(2, $categories); // Only active categories
-        
+
         foreach ($categories as $category) {
             $this->assertArrayHasKey('images', $category);
             $this->assertArrayHasKey('values', $category['images']);
@@ -163,13 +190,13 @@ class CategoryControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('categories', $responseData);
         $this->assertIsArray($responseData['categories']);
-        
+
         $categories = $responseData['categories'];
         $this->assertCount(3, $categories); // All categories, including inactive
-        
+
         foreach ($categories as $category) {
             $this->assertArrayHasKey('images', $category);
             $this->assertArrayHasKey('values', $category['images']);
@@ -193,14 +220,14 @@ class CategoryControllerTest extends ControllerTest
     {
         // Create a regular user
         $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
-        
+
         $user = new User();
         $user->setEmail('user@example.com');
         $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
         $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName('Regular');
         $user->setLastName('User');
-        
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 

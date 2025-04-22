@@ -24,6 +24,8 @@ class Category implements EntityWithImage
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
+    private array $images = [];
+
     public function getId(): int
     {
         return $this->id;
@@ -64,12 +66,11 @@ class Category implements EntityWithImage
 
     public function getImages(): array
     {
-        //TODO: implement images logic
-        return [];
+        return $this->images;
     }
 
-    public function setImages(): void
+    public function setImages(array $images): void
     {
-        //TODO: implement images logic
+        $this->images = $images;
     }
 }

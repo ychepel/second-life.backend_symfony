@@ -4,5 +4,5 @@ namespace App\Entity\Interface;
 
 interface EntityWithImage
 {
-    public function getId(): int;
+    public function getImages(): array;
 }

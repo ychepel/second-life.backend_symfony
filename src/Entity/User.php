@@ -46,6 +46,8 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     #[ORM\ManyToOne(targetEntity: Location::class)]
     private ?Location $location = null;
 
+    private array $images = [];
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
@@ -169,5 +171,15 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function getUserIdentifier(): string
     {
         return 'email';
+    }
+
+    public function getImages(): array
+    {
+        return $this->images;
+    }
+
+    public function setImages(array $images): array
+    {
+        return $this->images = $images;
     }
 }

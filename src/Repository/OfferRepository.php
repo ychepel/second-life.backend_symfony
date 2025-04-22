@@ -2,14 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Offer;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
-
-class OfferRepository extends ServiceEntityRepository
+class OfferRepository extends EntityWithImageRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Offer::class);
-    }
 }
