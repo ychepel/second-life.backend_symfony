@@ -140,19 +140,23 @@ class ImageControllerTest extends ControllerTest
         $this->assertIsArray($responseData['values']);
 
         $imageData = reset($responseData['values']);
+
         $this->assertArrayHasKey('1024x1024', $imageData);
         $this->assertArrayHasKey('320x320', $imageData);
         $this->assertArrayHasKey('64x64', $imageData);
 
-        $filePath1024 = __DIR__ . '/../../public' . $imageData['1024x1024'];
+        $relativePath1024 = parse_url($imageData['1024x1024'], PHP_URL_PATH);
+        $filePath1024 = __DIR__ . '/../../public' . $relativePath1024;
         $this->assertFileExists($filePath1024);
         $this->assertNotFalse(imagecreatefromstring(file_get_contents($filePath1024)));
 
-        $filePath320 = __DIR__ . '/../../public' . $imageData['320x320'];
+        $relativePath320 = parse_url($imageData['320x320'], PHP_URL_PATH);
+        $filePath320 = __DIR__ . '/../../public' . $relativePath320;
         $this->assertFileExists($filePath320);
         $this->assertNotFalse(imagecreatefromstring(file_get_contents($filePath320)));
 
-        $filePath64 = __DIR__ . '/../../public' . $imageData['64x64'];
+        $relativePath64 = parse_url($imageData['64x64'], PHP_URL_PATH);
+        $filePath64 = __DIR__ . '/../../public' . $relativePath64;
         $this->assertFileExists($filePath64);
         $this->assertNotFalse(imagecreatefromstring(file_get_contents($filePath64)));
     }
