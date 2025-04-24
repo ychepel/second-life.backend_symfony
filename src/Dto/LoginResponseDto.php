@@ -8,6 +8,18 @@ class LoginResponseDto
     private string $accessToken;
     private string $refreshToken;
 
+    /**
+     * @param int $clientId
+     * @param string $accessToken
+     * @param string $refreshToken
+     */
+    public function __construct(int $clientId, string $accessToken, string $refreshToken)
+    {
+        $this->clientId = $clientId;
+        $this->accessToken = $accessToken;
+        $this->refreshToken = $refreshToken;
+    }
+
     public function getClientId(): int
     {
         return $this->clientId;

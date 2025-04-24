@@ -26,3 +26,9 @@ services:
 
     Psr\Log\LoggerInterface: '@logger'
 
+    App\Service\ImageService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $appUrl: '%app.url%'
+            $env: '%kernel.environment%'
+

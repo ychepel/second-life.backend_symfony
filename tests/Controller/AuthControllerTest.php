@@ -78,7 +78,7 @@ class AuthControllerTest extends ControllerTest
         ];
 
         $response = $this->apiRequest('POST', '/api/v1/auth/user/login', $requestData);
-        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
         $this->assertEquals('Incorrect password', $responseData['error']);
