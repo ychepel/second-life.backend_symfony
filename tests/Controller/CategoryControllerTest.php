@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Image;
 use App\Entity\User;
 use App\Enum\UserRole;
+use App\Mapper\CategoryMappingService;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
@@ -480,30 +481,12 @@ class CategoryControllerTest extends ControllerTest
 
     public function testUpdateCategoryForbiddenForUser(): void
     {
-        $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
-        $user = new User();
-        $user->setEmail('user@example.com');
-        $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
-        $user->setRole(UserRole::ROLE_USER);
-        $user->setFirstName('Regular');
-        $user->setLastName('User');
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $loginRequest = [
-            'email' => 'user@example.com',
-            'password' => 'Qwerty!123'
-        ];
-        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
-        $loginData = json_decode($loginResponse->getContent(), true);
-        $accessToken = $loginData['accessToken'];
-
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Should Fail',
             'description' => 'Should Fail'
         ];
-        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
+        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $this->getAccessTokenForNewUser());
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
     }
 
@@ -548,6 +531,64 @@ class CategoryControllerTest extends ControllerTest
 
     public function testDeleteCategoryForbiddenForUser(): void
     {
+        $response = $this->apiRequest('DELETE', '/api/v1/categories/1', [], [], $this->getAccessTokenForNewUser());
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    public function testSetActiveCategorySuccess(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $this->apiRequest('DELETE', '/api/v1/categories/1', [], [], $accessToken);
+        $response = $this->apiRequest('PATCH', '/api/v1/categories/1/set-active', [], [], $accessToken);
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals(1, $responseData['id']);
+        $this->assertTrue($responseData['active'] ?? false, 'isActive should be true');
+    }
+
+    public function testSetActiveCategoryNotFound(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $response = $this->apiRequest('PATCH', '/api/v1/categories/9999/set-active', [], [], $accessToken);
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+    }
+
+    public function testSetActiveCategoryUnauthorized(): void
+    {
+        $response = $this->apiRequest('PATCH', '/api/v1/categories/1/set-active');
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
+    public function testSetActiveCategoryForbiddenForUser(): void
+    {
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/v1/categories/1/set-active',
+            [],
+            [],
+            $this->getAccessTokenForNewUser()
+        );
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    private function getAccessTokenForNewUser(): string
+    {
         $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
         $user = new User();
         $user->setEmail('user@example.com');
@@ -564,9 +605,7 @@ class CategoryControllerTest extends ControllerTest
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
-        $accessToken = $loginData['accessToken'];
 
-        $response = $this->apiRequest('DELETE', '/api/v1/categories/1', [], [], $accessToken);
-        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+        return $loginData['accessToken'];
     }
 }

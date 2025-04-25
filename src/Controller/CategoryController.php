@@ -114,4 +114,18 @@ class CategoryController extends AbstractController
             return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
+
+    #[Route(path: '/{id}/set-active', name: 'category_set_active', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function setCategoryActive(int $id): JsonResponse
+    {
+        try {
+            $categoryDto = $this->categoryService->activateCategory($id);
+
+            return $this->json($categoryDto, Response::HTTP_OK);
+        } catch (NotFoundHttpException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
+    }
+
 }

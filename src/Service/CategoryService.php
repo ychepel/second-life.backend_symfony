@@ -120,9 +120,28 @@ class CategoryService
         if ($category === null) {
             throw new NotFoundHttpException('Category does not exist');
         }
-
         $category->setIsActive(false);
         $this->entityManager->flush();
+        return $this->mappingService->toDto($category);
+    }
+
+    /**
+     * Activate category by id (set isActive=true)
+     * @param int $id
+     * @return CategoryResponseDto
+     * @throws NotFoundHttpException
+     */
+    public function activateCategory(int $id): CategoryResponseDto
+    {
+        /** @var CategoryRepository $repository */
+        $repository = $this->entityManager->getRepository(Category::class);
+        $category = $repository->findOneWithImage(['id' => $id]);
+        if ($category === null) {
+            throw new NotFoundHttpException('Category does not exist');
+        }
+        $category->setIsActive(true);
+        $this->entityManager->flush();
+
         return $this->mappingService->toDto($category);
     }
 }
