@@ -89,12 +89,25 @@ class CategoryController extends AbstractController
         return $this->json($response, Response::HTTP_CREATED);
     }
 
-    #[Route(path: '/{id}', name: 'category_update', requirements: ['id' => '\\d+'], methods: ['PUT'])]
+    #[Route(path: '/{id}', name: 'category_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN')]
     public function updateCategory(int $id, #[MapRequestPayload] CategoryRequestDto $request): JsonResponse
     {
         try {
             $categoryDto = $this->categoryService->updateCategory($id, $request);
+
+            return $this->json($categoryDto, Response::HTTP_OK);
+        } catch (NotFoundHttpException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    #[Route(path: '/{id}', name: 'category_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteCategory(int $id): JsonResponse
+    {
+        try {
+            $categoryDto = $this->categoryService->softDeleteCategory($id);
 
             return $this->json($categoryDto, Response::HTTP_OK);
         } catch (NotFoundHttpException $e) {

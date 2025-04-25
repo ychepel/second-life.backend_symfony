@@ -105,4 +105,24 @@ class CategoryService
 
         return $this->mappingService->toDto($category);
     }
+
+    /**
+     * Soft delete category by id (set isActive=false)
+     * @param int $id
+     * @return CategoryResponseDto
+     * @throws NotFoundHttpException
+     */
+    public function softDeleteCategory(int $id): CategoryResponseDto
+    {
+        /** @var CategoryRepository $repository */
+        $repository = $this->entityManager->getRepository(Category::class);
+        $category = $repository->findOneWithImage(['id' => $id]);
+        if ($category === null) {
+            throw new NotFoundHttpException('Category does not exist');
+        }
+
+        $category->setIsActive(false);
+        $this->entityManager->flush();
+        return $this->mappingService->toDto($category);
+    }
 }

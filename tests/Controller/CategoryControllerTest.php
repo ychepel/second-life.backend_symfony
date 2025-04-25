@@ -506,4 +506,67 @@ class CategoryControllerTest extends ControllerTest
         $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
     }
+
+    public function testDeleteCategorySuccess(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $response = $this->apiRequest('DELETE', '/api/v1/categories/1', [], [], $accessToken);
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals(1, $responseData['id']);
+        $this->assertFalse($responseData['active'] ?? true, 'isActive should be false');
+    }
+
+    public function testDeleteCategoryNotFound(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $response = $this->apiRequest('DELETE', '/api/v1/categories/9999', [], [], $accessToken);
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+    }
+
+    public function testDeleteCategoryUnauthorized(): void
+    {
+        $response = $this->apiRequest('DELETE', '/api/v1/categories/1');
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
+    public function testDeleteCategoryForbiddenForUser(): void
+    {
+        $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
+        $user = new User();
+        $user->setEmail('user@example.com');
+        $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
+        $user->setRole(UserRole::ROLE_USER);
+        $user->setFirstName('Regular');
+        $user->setLastName('User');
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $loginRequest = [
+            'email' => 'user@example.com',
+            'password' => 'Qwerty!123'
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $response = $this->apiRequest('DELETE', '/api/v1/categories/1', [], [], $accessToken);
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
 }
