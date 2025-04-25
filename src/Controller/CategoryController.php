@@ -2,15 +2,18 @@
 
 namespace App\Controller;
 
+use App\Dto\CategoryRequestDto;
+use App\Exception\DuplicateException;
 use App\Service\CategoryService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/v1')]
+#[Route('/api/v1/categories')]
 class CategoryController extends AbstractController
 {
     public function __construct(
@@ -18,7 +21,7 @@ class CategoryController extends AbstractController
         private readonly CategoryService $categoryService
     ) { }
 
-    #[Route('/categories/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getCategory(int $id): JsonResponse
     {
         try {
@@ -38,7 +41,7 @@ class CategoryController extends AbstractController
         return $this->json($categoryDto);
     }
 
-    #[Route('/categories', name: 'categories_list', methods: ['GET'])]
+    #[Route('', name: 'categories_list', methods: ['GET'])]
     public function getCategories(): JsonResponse
     {
         try {
@@ -54,7 +57,7 @@ class CategoryController extends AbstractController
         }
     }
 
-    #[Route('/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
+    #[Route('/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function getAllCategoriesForAdmin(): JsonResponse
     {
@@ -69,5 +72,18 @@ class CategoryController extends AbstractController
                 'error' => 'Internal server error'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    #[Route(path: '', name: 'category_add', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function register(#[MapRequestPayload] CategoryRequestDto $request): JsonResponse
+    {
+        try {
+            $response = $this->categoryService->createCategory($request);
+        } catch (DuplicateException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_CONFLICT);
+        }
+
+        return $this->json($response, Response::HTTP_CREATED);
     }
 }

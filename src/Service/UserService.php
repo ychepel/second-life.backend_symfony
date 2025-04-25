@@ -37,7 +37,8 @@ class UserService
 
             if (!empty($request->getBaseNameOfImages())) {
                 $em->flush();
-                $this->imageService->attachImages('user', $newUser->getId(), $request->getBaseNameOfImages());
+                $images = $this->imageService->attachImages('user', $newUser->getId(), $request->getBaseNameOfImages());
+                $newUser->setImages($images);
             }
 
             return $newUser;

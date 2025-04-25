@@ -48,12 +48,6 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
 
     private array $images = [];
 
-    public function __construct()
-    {
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
-    }
-
     public function getId(): int
     {
         return $this->id;
@@ -118,23 +112,9 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?\DateTime $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
     public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
-    }
-
-    //TODO: use autofilling for all Entities timestamps
-    #[ORM\PreUpdate]
-    public function setUpdatedAt(?\DateTime $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
     }
 
     public function getRole(): UserRole
@@ -181,5 +161,16 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setImages(array $images): array
     {
         return $this->images = $images;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updateTimestamps(): void
+    {
+        $this->updatedAt = new \DateTime();
+
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
     }
 }

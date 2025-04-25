@@ -7,6 +7,7 @@ use App\Entity\Image;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 class CategoryControllerTest extends ControllerTest
@@ -33,14 +34,14 @@ class CategoryControllerTest extends ControllerTest
 
         // Create admin user
         $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
-        
+
         $admin = new User();
         $admin->setEmail(self::TEST_ADMIN_DATA['email']);
         $admin->setPassword($passwordHasher->hashPassword($admin, self::TEST_ADMIN_DATA['password']));
         $admin->setRole(UserRole::ROLE_ADMIN);
         $admin->setFirstName(self::TEST_ADMIN_DATA['firstName']);
         $admin->setLastName(self::TEST_ADMIN_DATA['lastName']);
-        
+
         $this->entityManager->persist($admin);
 
         // Create test categories
@@ -244,5 +245,98 @@ class CategoryControllerTest extends ControllerTest
         // Try to get all categories
         $response = $this->apiRequest('GET', '/api/v1/categories/get-all-for-admin', accessToken: $accessToken);
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    private function createTestFile(): UploadedFile
+    {
+        $file = new \SplFileInfo(__DIR__ . '/fixtures/test.jpg');
+        return new UploadedFile(
+            $file->getPathname(),
+            'test.jpg',
+            'image/jpeg',
+            UPLOAD_ERR_OK,
+            true
+        );
+    }
+
+    public function testCreateCategorySuccess(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $file = $this->createTestFile();
+        $imageResponse = $this->apiRequest('POST', '/api/v1/images', [
+            'entityType' => 'category',
+            'entityId' => null
+        ], ['file' => $file], accessToken: $accessToken);
+        $this->assertEquals(Response::HTTP_OK, $imageResponse->getStatusCode());
+        $imageData = json_decode($imageResponse->getContent(), true);
+        $baseNameOfImages = array_keys($imageData['values']);
+
+        $requestData = [
+            'baseNameOfImages' => $baseNameOfImages,
+            'name' => 'New Category',
+            'description' => 'Some description'
+        ];
+
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('id', $responseData);
+        $this->assertEquals('New Category', $responseData['name']);
+        $this->assertEquals('Some description', $responseData['description']);
+        $this->assertArrayHasKey('images', $responseData);
+    }
+
+    public function testCreateCategoryValidationError(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => ['not-a-uuid'],
+            'name' => '',
+            'description' => str_repeat('a', 1001)
+        ];
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $responseData);
+        $fields = array_column($responseData['errors'], 'field');
+        $this->assertContains('baseNameOfImages0', $fields);
+        $this->assertContains('name', $fields);
+        $this->assertContains('description', $fields);
+    }
+
+    public function testCreateCategoryConflict(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Electronics and gadgets',
+            'description' => 'Duplicate name category'
+        ];
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+        $this->assertStringContainsString('already exists', $responseData['error']);
     }
 }

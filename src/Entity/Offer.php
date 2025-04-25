@@ -26,7 +26,7 @@ class Offer implements EntityWithImage
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTime $createdAt = null;
 
     #[ORM\Column(type: 'integer')]
@@ -63,11 +63,6 @@ class Offer implements EntityWithImage
     private ?\DateTime $updatedAt = null;
 
     private array $images = [];
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTime();
-    }
 
     public function getId(): ?int
     {
@@ -110,12 +105,6 @@ class Offer implements EntityWithImage
     public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTime $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-        return $this;
     }
 
     public function getAuctionDurationDays(): ?int
@@ -222,12 +211,6 @@ class Offer implements EntityWithImage
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTime $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
     public function getImages(): array
     {
         return $this->images;
@@ -236,5 +219,16 @@ class Offer implements EntityWithImage
     public function setImages(array $images): array
     {
         return $this->images = $images;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updateTimestamps(): void
+    {
+        $this->updatedAt = new \DateTime();
+
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
     }
 }

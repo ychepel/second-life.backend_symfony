@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1')]
+#[Route('/api/v1/locations')]
 class LocationController extends AbstractController
 {
     public function __construct(
@@ -17,7 +17,7 @@ class LocationController extends AbstractController
         private readonly LocationService $locationService
     ) { }
 
-    #[Route('/locations', name: 'locations_list', methods: ['GET'])]
+    #[Route('', name: 'locations_list', methods: ['GET'])]
     public function getLocations(): JsonResponse
     {
         try {
@@ -33,7 +33,7 @@ class LocationController extends AbstractController
         }
     }
 
-    #[Route('/locations/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getLocation(int $id): JsonResponse
     {
         try {

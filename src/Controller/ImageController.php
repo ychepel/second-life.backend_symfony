@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1')]
+#[Route('/api/v1/images')]
 class ImageController extends AbstractController
 {
     public function __construct(
@@ -26,13 +26,14 @@ class ImageController extends AbstractController
         private readonly OfferRepository $offerRepository
     ) { }
 
-    #[Route('/images', name: 'image_upload', methods: ['POST'])]
+    #[Route('', name: 'image_upload', methods: ['POST'])]
     public function uploadImage(Request $request): JsonResponse {
         try {
             /** @var User $user */
             $user = $this->security->getUser();
             $entityType = $request->request->get('entityType');
-            $entityId = (int) $request->request->get('entityId');
+            $entityId = $request->request->get('entityId');
+            $entityId = is_numeric($entityId) ? (int) $entityId : null;
             $file = $request->files->get('file');
             $result = $this->imageService->uploadImage(
                 $file,
@@ -53,7 +54,7 @@ class ImageController extends AbstractController
         }
     }
 
-    #[Route('/images', name: 'image_delete', methods: ['DELETE'])]
+    #[Route('', name: 'image_delete', methods: ['DELETE'])]
     public function deleteImage(Request $request): JsonResponse {
         try {
             /** @var User $user */

@@ -7,6 +7,7 @@ use App\Entity\Offer;
 use App\Entity\User;
 use App\Enum\OfferStatus;
 use App\Enum\UserRole;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;

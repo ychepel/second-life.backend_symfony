@@ -6,9 +6,12 @@ use App\Entity\Image;
 use App\Enum\UserRole;
 use App\Exception\AccessException;
 use App\Exception\ServiceException;
+use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use Liip\ImagineBundle\Model\Binary;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints\File;
@@ -22,6 +25,7 @@ class ImageService
     private const int MAX_USER_IMAGES = 1;
     private const int MAX_CATEGORY_IMAGES = 1;
     private const array ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png'];
+    private const string TMP_FOLDER_NAME = 'tmp';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -30,8 +34,49 @@ class ImageService
         private readonly string $env,
         private readonly ValidatorInterface $validator,
         private readonly TranslatorInterface $translator,
-        private readonly FilterManager $filterManager
+        private readonly FilterManager $filterManager,
+        private readonly LoggerInterface $logger
     ) {}
+
+    /**
+     * @param string $entityType
+     * @param int $entityId
+     * @param array $baseNames
+     * @return Image[]
+     */
+    public function attachImages(string $entityType, int $entityId, array $baseNames): array
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $query = $queryBuilder
+            ->update('App\Entity\Image', 'i')
+            ->set('i.entityId', ':newEntityId')
+            ->set('i.updatedAt', ':updatedAt')
+            ->where($queryBuilder->expr()->in('i.baseName', ':baseNames'))
+            ->andWhere('i.entityType = :entityType')
+            ->andWhere('i.entityId is NULL')
+            ->setParameter('newEntityId', $entityId)
+            ->setParameter('baseNames', $baseNames)
+            ->setParameter('entityType', $entityType)
+            ->setParameter('updatedAt', new \DateTime())
+            ->getQuery();
+
+        $updatedCount = $query->execute();
+
+        if ($updatedCount === 0) {
+            $this->logger->error(
+                "Failed to attach images to entity `$entityType`",
+                ['entityId' => $entityId, 'baseNames' => $baseNames]
+            );
+            throw new ServiceException("Failed to attach images to `$entityType`");
+        }
+
+        /** @var ImageRepository $imageRepository */
+        $imageRepository = $this->entityManager->getRepository(Image::class);
+        $images = $imageRepository->findAllByBaseNames($baseNames);
+        $this->moveImagesToPermanentFolder($images, $entityId);
+
+        return $images;
+    }
 
     /**
      * @throws ServiceException
@@ -156,7 +201,7 @@ class ImageService
                 '%s/%s/%s/%s_%s.%s',
                 $this->env === 'test' ? 'test-images' : 'images',
                 $entityType,
-                $entityId ?: 'tmp',
+                $entityId ?: self::TMP_FOLDER_NAME,
                 $filterName,
                 $baseName,
                 $extension
@@ -203,5 +248,33 @@ class ImageService
         $image->setFullPath($filePath);
         $this->entityManager->persist($image);
         $this->entityManager->flush();
+    }
+
+    private function moveImagesToPermanentFolder(array $images): void
+    {
+        /** @var Image $image */
+        foreach ($images as $image) {
+            $oldPath = $image->getFullPath();
+            $newPath = str_replace('/' . self::TMP_FOLDER_NAME . '/', "/{$image->getEntityId()}/", $oldPath);
+            $fs = new Filesystem();
+            $targetDir = dirname($newPath);
+
+            try {
+                if (!$fs->exists($targetDir)) {
+                    $fs->mkdir($targetDir);
+                }
+                $fs->copy($oldPath, $newPath);
+            } catch (IOException $e) {
+                $this->logger->error('Cannot move image', [
+                    'exception' => $e->getMessage(),
+                    'imageId' => $image->getId(),
+                    'entityId' => $image->getEntityId()]);
+                return;
+            }
+
+            $image->setFullPath($newPath);
+            $this->entityManager->persist($image);
+            $this->entityManager->flush();
+        }
     }
 }

@@ -21,8 +21,6 @@ class AdminFixture extends Fixture
         $user->setLastName('AdminLastName');
         $user->setPassword($this->passwordHasher->hashPassword($user, 'Security!234'));
         $user->setRole(UserRole::ROLE_ADMIN);
-        $user->setCreatedAt(new \DateTime());
-        $user->setUpdatedAt(new \DateTime());
         $user->setIsActive(true);
 
         $manager->persist($user);
