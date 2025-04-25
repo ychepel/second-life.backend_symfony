@@ -10,8 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[Route('/api/v1/categories')]
 class CategoryController extends AbstractController
@@ -85,5 +87,18 @@ class CategoryController extends AbstractController
         }
 
         return $this->json($response, Response::HTTP_CREATED);
+    }
+
+    #[Route(path: '/{id}', name: 'category_update', requirements: ['id' => '\\d+'], methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function updateCategory(int $id, #[MapRequestPayload] CategoryRequestDto $request): JsonResponse
+    {
+        try {
+            $categoryDto = $this->categoryService->updateCategory($id, $request);
+
+            return $this->json($categoryDto, Response::HTTP_OK);
+        } catch (NotFoundHttpException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
     }
 }

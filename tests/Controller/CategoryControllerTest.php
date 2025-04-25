@@ -362,4 +362,148 @@ class CategoryControllerTest extends ControllerTest
         $this->assertArrayHasKey('error', $responseData);
         $this->assertStringContainsString('already exists', $responseData['error']);
     }
+
+    public function testCreateCategoryUnauthorized(): void
+    {
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Should Fail',
+            'description' => 'Should Fail'
+        ];
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData);
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
+    public function testCreateCategoryForbiddenForUser(): void
+    {
+        $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
+        $user = new User();
+        $user->setEmail('user@example.com');
+        $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
+        $user->setRole(UserRole::ROLE_USER);
+        $user->setFirstName('Regular');
+        $user->setLastName('User');
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $loginRequest = [
+            'email' => 'user@example.com',
+            'password' => 'Qwerty!123'
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Should Fail',
+            'description' => 'Should Fail'
+        ];
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    public function testUpdateCategorySuccess(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Updated Category',
+            'description' => 'Updated description'
+        ];
+        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals('Updated Category', $responseData['name']);
+        $this->assertEquals('Updated description', $responseData['description']);
+    }
+
+    public function testUpdateCategoryNotFound(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Any',
+            'description' => 'Any'
+        ];
+        $response = $this->apiRequest('PUT', '/api/v1/categories/9999', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('error', $responseData);
+    }
+
+    public function testUpdateCategoryValidationError(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => ['not-a-uuid'],
+            'name' => '',
+            'description' => str_repeat('a', 1001)
+        ];
+        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $responseData);
+    }
+
+    public function testUpdateCategoryUnauthorized(): void
+    {
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Should Fail',
+            'description' => 'Should Fail'
+        ];
+        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData);
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
+    public function testUpdateCategoryForbiddenForUser(): void
+    {
+        $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
+        $user = new User();
+        $user->setEmail('user@example.com');
+        $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
+        $user->setRole(UserRole::ROLE_USER);
+        $user->setFirstName('Regular');
+        $user->setLastName('User');
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $loginRequest = [
+            'email' => 'user@example.com',
+            'password' => 'Qwerty!123'
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [],
+            'name' => 'Should Fail',
+            'description' => 'Should Fail'
+        ];
+        $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
 }

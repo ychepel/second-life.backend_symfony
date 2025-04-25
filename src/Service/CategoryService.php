@@ -10,6 +10,7 @@ use App\Mapper\CategoryMappingService;
 use App\Repository\CategoryRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CategoryService
 {
@@ -72,6 +73,35 @@ class CategoryService
         } catch (UniqueConstraintViolationException) {
             throw new DuplicateException('Category with this name already exists');
         }
+
+        return $this->mappingService->toDto($category);
+    }
+
+    /**
+     * @param int $id
+     * @param CategoryRequestDto $request
+     * @return CategoryResponseDto
+     * @throws NotFoundHttpException
+     */
+    public function updateCategory(int $id, CategoryRequestDto $request): CategoryResponseDto
+    {
+        /** @var CategoryRepository $repository */
+        $repository = $this->entityManager->getRepository(Category::class);
+        $category = $repository->findOneWithImage(['id' => $id]);
+
+        if ($category === null) {
+            throw new NotFoundHttpException('Category does not exist');
+        }
+
+        $category->setName($request->getName())
+            ->setDescription($request->getDescription());
+
+        if (!empty($request->getBaseNameOfImages())) {
+            $images = $this->imageService->attachImages('category', $category->getId(), $request->getBaseNameOfImages());
+            $category->setImages($images);
+        }
+
+        $this->entityManager->flush();
 
         return $this->mappingService->toDto($category);
     }
