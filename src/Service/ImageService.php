@@ -6,6 +6,7 @@ use App\Entity\Image;
 use App\Enum\UserRole;
 use App\Exception\AccessException;
 use App\Exception\ServiceException;
+use App\Helper\ExceptionHelper;
 use App\Repository\ImageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\ImagineBundle\Imagine\Filter\FilterManager;
@@ -63,11 +64,11 @@ class ImageService
         $updatedCount = $query->execute();
 
         if ($updatedCount === 0) {
-            $this->logger->error(
+            $this->logger->warning(
                 "Failed to attach images to entity `$entityType`",
                 ['entityId' => $entityId, 'baseNames' => $baseNames]
             );
-            throw new ServiceException("Failed to attach images to `$entityType`");
+            ExceptionHelper::throwValidationException('Incorrect image(s) identifier', 'baseNameOfImages', $baseNames);
         }
 
         /** @var ImageRepository $imageRepository */

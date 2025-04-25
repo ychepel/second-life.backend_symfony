@@ -9,6 +9,7 @@ use App\Enum\UserRole;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 
 class CategoryControllerTest extends ControllerTest
 {
@@ -316,6 +317,28 @@ class CategoryControllerTest extends ControllerTest
         $this->assertContains('baseNameOfImages0', $fields);
         $this->assertContains('name', $fields);
         $this->assertContains('description', $fields);
+    }
+
+    public function testCreateCategoryInvalidImages(): void
+    {
+        $loginRequest = [
+            'email' => self::TEST_ADMIN_DATA['email'],
+            'password' => self::TEST_ADMIN_DATA['password']
+        ];
+        $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
+        $loginData = json_decode($loginResponse->getContent(), true);
+        $accessToken = $loginData['accessToken'];
+
+        $requestData = [
+            'baseNameOfImages' => [Uuid::v4()->toString()],
+            'name' => 'Test category',
+            'description' => 'Test description'
+        ];
+        $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
+        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('errors', $responseData);
+        $this->assertContains('baseNameOfImages', array_column($responseData['errors'], 'field'));
     }
 
     public function testCreateCategoryConflict(): void
