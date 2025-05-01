@@ -2,14 +2,14 @@
 
 namespace App\Dto;
 
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator as AppAssert;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class UserRegistrationRequestDto
 {
     #[Assert\All([
         new Assert\NotBlank(),
-//        new Assert\Uuid()
+        //        new Assert\Uuid()
     ])]
     private array $baseNameOfImages = [];
 
@@ -32,13 +32,12 @@ class UserRegistrationRequestDto
     private string $password;
 
     public function __construct(
-        array  $baseNameOfImages = [],
+        array $baseNameOfImages = [],
         string $firstName = '',
         string $lastName = '',
         string $email = '',
-        string $password = ''
-    )
-    {
+        string $password = '',
+    ) {
         $this->setBaseNameOfImages($baseNameOfImages);
         $this->setFirstName($firstName);
         $this->setLastName($lastName);
@@ -54,6 +53,7 @@ class UserRegistrationRequestDto
     public function setBaseNameOfImages(array $baseNameOfImages): self
     {
         $this->baseNameOfImages = $baseNameOfImages;
+
         return $this;
     }
 
@@ -65,6 +65,7 @@ class UserRegistrationRequestDto
     public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
+
         return $this;
     }
 
@@ -76,6 +77,7 @@ class UserRegistrationRequestDto
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
+
         return $this;
     }
 
@@ -87,6 +89,7 @@ class UserRegistrationRequestDto
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -98,6 +101,7 @@ class UserRegistrationRequestDto
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
         return $this;
     }
 
@@ -110,6 +114,4 @@ class UserRegistrationRequestDto
             $this->email
         );
     }
-
-
 }

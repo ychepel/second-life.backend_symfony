@@ -16,9 +16,9 @@ class UserService
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly EntityManagerInterface $entityManager,
         private readonly ImageService $imageService,
-        private readonly UserMappingService $userMappingService
-    )
-    {}
+        private readonly UserMappingService $userMappingService,
+    ) {
+    }
 
     public function createUser(UserRegistrationRequestDto $request): UserResponseDto
     {
@@ -46,6 +46,4 @@ class UserService
 
         return $this->userMappingService->toDto($user);
     }
-
-
 }

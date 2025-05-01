@@ -14,7 +14,7 @@ class RejectionReasonFixtures extends Fixture
             'Incorrect title',
             'Incorrect description',
             'Incorrect images',
-            'Incorrect category'
+            'Incorrect category',
         ];
 
         foreach ($reasons as $reason) {

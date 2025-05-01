@@ -9,7 +9,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 abstract class MappingEntityWithImage
 {
     public function __construct(private readonly ContainerBagInterface $params)
-    { }
+    {
+    }
 
     protected function getImages(EntityWithImage $entity): array
     {

@@ -10,8 +10,6 @@ use App\Entity\User;
 use App\Enum\UserRole;
 use App\Exception\ServiceException;
 use App\Repository\UserRepository;
-use DateMalformedStringException;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
@@ -29,15 +27,12 @@ class AuthService
         private readonly JWTEncoderInterface $jwtEncoder,
         private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
         private readonly UserRepository $userRepository,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
     }
 
     /**
-     * @param LoginRequestDto $loginRequest
-     * @param string $roleName
-     * @return LoginResponseDto
-     * @throws DateMalformedStringException
+     * @throws \DateMalformedStringException
      * @throws JWTEncodeFailureException
      */
     public function login(LoginRequestDto $loginRequest, string $roleName): LoginResponseDto
@@ -81,12 +76,12 @@ class AuthService
             throw new ServiceException('Invalid token data');
         }
         $refreshToken = $this->entityManager->getRepository(RefreshToken::class)->findOneBy([
-            'token' => $refreshTokenRequest->getRefreshToken()
+            'token' => $refreshTokenRequest->getRefreshToken(),
         ]);
         if (!$refreshToken) {
             throw new ServiceException('Refresh token not found');
         }
-        if ($refreshToken->getInvalidationDate() < new DateTimeImmutable()) {
+        if ($refreshToken->getInvalidationDate() < new \DateTimeImmutable()) {
             throw new ServiceException('Refresh token expired');
         }
         if ($refreshToken->getRole() !== $roleName) {
@@ -123,7 +118,7 @@ class AuthService
             throw new \InvalidArgumentException('Invalid role');
         }
         $refreshToken = $this->entityManager->getRepository(RefreshToken::class)->findOneBy([
-            'email' => $user->getEmail()
+            'email' => $user->getEmail(),
         ]);
         if ($refreshToken) {
             $this->entityManager->remove($refreshToken);
@@ -132,10 +127,10 @@ class AuthService
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @throws \DateMalformedStringException
      * @throws JWTEncodeFailureException
      */
-    private function generateRefreshToken(object $user, DateTimeImmutable $expiration): string
+    private function generateRefreshToken(object $user, \DateTimeImmutable $expiration): string
     {
         $tokenData = [
             'user_id' => $user->getId(),
@@ -148,12 +143,12 @@ class AuthService
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @throws \DateMalformedStringException
      * @throws JWTEncodeFailureException
      */
     private function generateAccessToken(object $user): string
     {
-        $expiration = new DateTimeImmutable()->modify('+' . self::ACCESS_TOKEN_EXPIRATION_DAYS . ' days');
+        $expiration = new \DateTimeImmutable()->modify('+'.self::ACCESS_TOKEN_EXPIRATION_DAYS.' days');
         $tokenData = [
             'user_id' => $user->getId(),
             'role' => $user->getRole()->name,
@@ -164,7 +159,7 @@ class AuthService
         return $this->jwtEncoder->encode($tokenData);
     }
 
-    private function storeRefreshToken(object $user, string $refreshToken, DateTimeImmutable $expiration): void
+    private function storeRefreshToken(object $user, string $refreshToken, \DateTimeImmutable $expiration): void
     {
         $refreshTokenEntity = new RefreshToken(
             $refreshToken,
@@ -176,8 +171,8 @@ class AuthService
         $this->entityManager->flush();
     }
 
-    private function getRefreshTokenExpirationDate(): DateTimeImmutable
+    private function getRefreshTokenExpirationDate(): \DateTimeImmutable
     {
-        return new DateTimeImmutable()->modify('+' . self::REFRESH_TOKEN_EXPIRATION_DAYS . ' days');
+        return new \DateTimeImmutable()->modify('+'.self::REFRESH_TOKEN_EXPIRATION_DAYS.' days');
     }
 }

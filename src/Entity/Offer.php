@@ -41,7 +41,7 @@ class Offer implements EntityWithImage
     #[ORM\Column(type: 'boolean')]
     private bool $isFree = false;
 
-    #[ORM\Column(type: "offer_status_enum", nullable: false)]
+    #[ORM\Column(type: 'offer_status_enum', nullable: false)]
     private OfferStatus $status = OfferStatus::DRAFT;
 
     #[ORM\ManyToOne(targetEntity: Category::class)]
@@ -77,6 +77,7 @@ class Offer implements EntityWithImage
     public function setUser(User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -88,6 +89,7 @@ class Offer implements EntityWithImage
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -99,6 +101,7 @@ class Offer implements EntityWithImage
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
@@ -115,6 +118,7 @@ class Offer implements EntityWithImage
     public function setAuctionDurationDays(int $auctionDurationDays): self
     {
         $this->auctionDurationDays = $auctionDurationDays;
+
         return $this;
     }
 
@@ -126,6 +130,7 @@ class Offer implements EntityWithImage
     public function setStartPrice(?float $startPrice): self
     {
         $this->startPrice = $startPrice;
+
         return $this;
     }
 
@@ -137,6 +142,7 @@ class Offer implements EntityWithImage
     public function setWinBid(?float $winBid): self
     {
         $this->winBid = $winBid;
+
         return $this;
     }
 
@@ -148,6 +154,7 @@ class Offer implements EntityWithImage
     public function setIsFree(bool $isFree): self
     {
         $this->isFree = $isFree;
+
         return $this;
     }
 
@@ -159,6 +166,7 @@ class Offer implements EntityWithImage
     public function setStatus(OfferStatus $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
@@ -170,6 +178,7 @@ class Offer implements EntityWithImage
     public function setCategory(Category $category): self
     {
         $this->category = $category;
+
         return $this;
     }
 
@@ -181,6 +190,7 @@ class Offer implements EntityWithImage
     public function setWinnerBid(?Bid $winnerBid): self
     {
         $this->winnerBid = $winnerBid;
+
         return $this;
     }
 
@@ -192,6 +202,7 @@ class Offer implements EntityWithImage
     public function setLocation(?Location $location): self
     {
         $this->location = $location;
+
         return $this;
     }
 
@@ -203,6 +214,7 @@ class Offer implements EntityWithImage
     public function setAuctionFinishedAt(?\DateTime $auctionFinishedAt): self
     {
         $this->auctionFinishedAt = $auctionFinishedAt;
+
         return $this;
     }
 
@@ -227,7 +239,7 @@ class Offer implements EntityWithImage
     {
         $this->updatedAt = new \DateTime();
 
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

@@ -10,9 +10,10 @@ use App\Repository\LocationRepository;
 class LocationService
 {
     public function __construct(
-        private readonly LocationRepository     $locationRepository,
-        private readonly LocationMappingService $mappingService
-    ) { }
+        private readonly LocationRepository $locationRepository,
+        private readonly LocationMappingService $mappingService,
+    ) {
+    }
 
     public function getAll(): array
     {
@@ -27,6 +28,6 @@ class LocationService
     {
         $location = $this->locationRepository->find($id);
 
-        return $location !== null ? $this->mappingService->toDto($location) : null;
+        return null !== $location ? $this->mappingService->toDto($location) : null;
     }
 }

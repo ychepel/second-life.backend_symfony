@@ -16,7 +16,7 @@ class UserMappingService extends MappingEntityWithImage
             ->setEmail($user->getEmail())
             ->setCreatedAt($user->getCreatedAt())
             ->setLocationId($user->getLocation()?->getId())
-            ->setLastActive($user->getUpdatedAt()) //TODO: implement logic for storing login dates
+            ->setLastActive($user->getUpdatedAt()) // TODO: implement logic for storing login dates
             ->setImages(parent::getImages($user));
 
         return $response;

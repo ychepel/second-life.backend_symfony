@@ -59,6 +59,4 @@ class CategoryResponseDto
     {
         $this->images = $images;
     }
-
-
 }

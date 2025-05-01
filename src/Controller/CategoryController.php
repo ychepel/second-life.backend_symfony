@@ -13,15 +13,15 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[Route('/api/v1/categories')]
 class CategoryController extends AbstractController
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly CategoryService $categoryService
-    ) { }
+        private readonly CategoryService $categoryService,
+    ) {
+    }
 
     #[Route('/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getCategory(int $id): JsonResponse
@@ -29,14 +29,14 @@ class CategoryController extends AbstractController
         try {
             $categoryDto = $this->categoryService->getActiveById($id);
         } catch (\Exception $e) {
-            $this->logger->error('Error getting category: ' . $e->getMessage());
+            $this->logger->error('Error getting category: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if ($categoryDto === null) {
+        if (null === $categoryDto) {
             return $this->json(['error' => 'Category not found'], Response::HTTP_NOT_FOUND);
         }
 
@@ -51,10 +51,10 @@ class CategoryController extends AbstractController
 
             return $this->json(['categories' => $categories]);
         } catch (\Exception $e) {
-            $this->logger->error('Error getting categories: ' . $e->getMessage());
+            $this->logger->error('Error getting categories: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -68,10 +68,10 @@ class CategoryController extends AbstractController
 
             return $this->json(['categories' => $categories]);
         } catch (\Exception $e) {
-            $this->logger->error('Error getting categories: ' . $e->getMessage());
+            $this->logger->error('Error getting categories: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -127,5 +127,4 @@ class CategoryController extends AbstractController
             return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
-
 }

@@ -43,6 +43,7 @@ class Bid
     public function setUser(User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -54,6 +55,7 @@ class Bid
     public function setOffer(Offer $offer): self
     {
         $this->offer = $offer;
+
         return $this;
     }
 
@@ -65,6 +67,7 @@ class Bid
     public function setBidValue(float $bidValue): self
     {
         $this->bidValue = $bidValue;
+
         return $this;
     }
 
@@ -84,7 +87,7 @@ class Bid
     {
         $this->updatedAt = new \DateTime();
 
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

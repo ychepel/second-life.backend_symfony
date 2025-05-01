@@ -18,8 +18,8 @@ class CategoryService
         private readonly EntityManagerInterface $entityManager,
         private readonly CategoryMappingService $mappingService,
         private readonly ImageService $imageService,
-    )
-    {}
+    ) {
+    }
 
     public function getActiveById(int $id): ?CategoryResponseDto
     {
@@ -27,7 +27,7 @@ class CategoryService
         $repository = $this->entityManager->getRepository(Category::class);
         $category = $repository->findOneWithImage(['id' => $id, 'isActive' => true]);
 
-        return $category === null ? null : $this->mappingService->toDto($category);
+        return null === $category ? null : $this->mappingService->toDto($category);
     }
 
     public function getAll(bool $activeOnly = true): array
@@ -48,8 +48,6 @@ class CategoryService
     }
 
     /**
-     * @param CategoryRequestDto $request
-     * @return CategoryResponseDto
      * @throws DuplicateException
      */
     public function createCategory(CategoryRequestDto $request): CategoryResponseDto
@@ -78,9 +76,6 @@ class CategoryService
     }
 
     /**
-     * @param int $id
-     * @param CategoryRequestDto $request
-     * @return CategoryResponseDto
      * @throws NotFoundHttpException
      */
     public function updateCategory(int $id, CategoryRequestDto $request): CategoryResponseDto
@@ -89,7 +84,7 @@ class CategoryService
         $repository = $this->entityManager->getRepository(Category::class);
         $category = $repository->findOneWithImage(['id' => $id]);
 
-        if ($category === null) {
+        if (null === $category) {
             throw new NotFoundHttpException('Category does not exist');
         }
 
@@ -107,9 +102,8 @@ class CategoryService
     }
 
     /**
-     * Soft delete category by id (set isActive=false)
-     * @param int $id
-     * @return CategoryResponseDto
+     * Soft delete category by id (set isActive=false).
+     *
      * @throws NotFoundHttpException
      */
     public function softDeleteCategory(int $id): CategoryResponseDto
@@ -117,18 +111,18 @@ class CategoryService
         /** @var CategoryRepository $repository */
         $repository = $this->entityManager->getRepository(Category::class);
         $category = $repository->findOneWithImage(['id' => $id]);
-        if ($category === null) {
+        if (null === $category) {
             throw new NotFoundHttpException('Category does not exist');
         }
         $category->setIsActive(false);
         $this->entityManager->flush();
+
         return $this->mappingService->toDto($category);
     }
 
     /**
-     * Activate category by id (set isActive=true)
-     * @param int $id
-     * @return CategoryResponseDto
+     * Activate category by id (set isActive=true).
+     *
      * @throws NotFoundHttpException
      */
     public function activateCategory(int $id): CategoryResponseDto
@@ -136,7 +130,7 @@ class CategoryService
         /** @var CategoryRepository $repository */
         $repository = $this->entityManager->getRepository(Category::class);
         $category = $repository->findOneWithImage(['id' => $id]);
-        if ($category === null) {
+        if (null === $category) {
             throw new NotFoundHttpException('Category does not exist');
         }
         $category->setIsActive(true);

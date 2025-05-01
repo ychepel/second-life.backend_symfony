@@ -42,7 +42,7 @@ class RefreshToken
         string $token,
         \DateTimeImmutable $invalidationDate,
         string $email,
-        UserRole $role
+        UserRole $role,
     ) {
         $this->token = $token;
         $this->invalidationDate = $invalidationDate;
@@ -80,6 +80,4 @@ class RefreshToken
     {
         return $this->createdAt;
     }
-
-
 }

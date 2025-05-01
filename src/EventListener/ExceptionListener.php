@@ -30,9 +30,9 @@ class ExceptionListener
         /** @var ConstraintViolationInterface $violation */
         foreach ($violations as $violation) {
             $errors[] = [
-                'field'         => $this->formatPropertyPath($violation->getPropertyPath()),
+                'field' => $this->formatPropertyPath($violation->getPropertyPath()),
                 'rejectedValue' => $violation->getInvalidValue(),
-                'message'       => $violation->getMessage(),
+                'message' => $violation->getMessage(),
             ];
         }
 

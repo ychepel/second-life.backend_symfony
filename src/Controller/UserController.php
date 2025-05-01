@@ -20,5 +20,4 @@ class UserController extends AbstractController
 
         return $this->json($response, Response::HTTP_CREATED);
     }
-
 }

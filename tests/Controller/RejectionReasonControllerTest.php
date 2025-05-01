@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\RejectionReason;
 use App\Entity\User;
 use App\Enum\UserRole;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -14,7 +13,7 @@ class RejectionReasonControllerTest extends ControllerTest
         'email' => 'admin@example.com',
         'password' => 'Qwerty!123',
         'firstName' => 'Admin',
-        'lastName' => 'User'
+        'lastName' => 'User',
     ];
 
     protected function setUp(): void
@@ -32,14 +31,14 @@ class RejectionReasonControllerTest extends ControllerTest
 
         // Create admin user
         $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
-        
+
         $admin = new User();
         $admin->setEmail(self::TEST_ADMIN_DATA['email']);
         $admin->setPassword($passwordHasher->hashPassword($admin, self::TEST_ADMIN_DATA['password']));
         $admin->setRole(UserRole::ROLE_ADMIN);
         $admin->setFirstName(self::TEST_ADMIN_DATA['firstName']);
         $admin->setLastName(self::TEST_ADMIN_DATA['lastName']);
-        
+
         $this->entityManager->persist($admin);
         $this->entityManager->flush();
     }
@@ -49,7 +48,7 @@ class RejectionReasonControllerTest extends ControllerTest
         // Login as admin to get access token
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
@@ -61,10 +60,10 @@ class RejectionReasonControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('reasons', $responseData);
         $this->assertIsArray($responseData['reasons']);
-        
+
         foreach ($responseData['reasons'] as $reason) {
             $this->assertArrayHasKey('id', $reason);
             $this->assertArrayHasKey('name', $reason);
@@ -84,7 +83,7 @@ class RejectionReasonControllerTest extends ControllerTest
         // Login as admin to get access token
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
@@ -102,21 +101,21 @@ class RejectionReasonControllerTest extends ControllerTest
     {
         // Create a regular user
         $passwordHasher = $this->client->getContainer()->get('security.user_password_hasher');
-        
+
         $user = new User();
         $user->setEmail('user@example.com');
         $user->setPassword($passwordHasher->hashPassword($user, 'Qwerty!123'));
         $user->setRole(UserRole::ROLE_USER);
         $user->setFirstName('Regular');
         $user->setLastName('User');
-        
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
         // Login as regular user
         $loginRequest = [
             'email' => 'user@example.com',
-            'password' => 'Qwerty!123'
+            'password' => 'Qwerty!123',
         ];
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);

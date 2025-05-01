@@ -20,17 +20,16 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api/v1/auth')]
 class AuthController extends AbstractController
 {
-
     public function __construct(
         private readonly AuthService $authService,
-        private readonly Security $security
+        private readonly Security $security,
     ) {
     }
 
     #[Route('/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function login(
         #[MapRequestPayload] LoginRequestDto $loginRequest,
-        string $roleName
+        string $roleName,
     ): Response {
         try {
             $loginResponse = $this->authService->login($loginRequest, $roleName);
@@ -60,7 +59,7 @@ class AuthController extends AbstractController
     #[Route('/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function refreshAccessToken(
         #[MapRequestPayload] RefreshTokenRequestDto $refreshTokenRequest,
-        string $roleName
+        string $roleName,
     ): Response {
         try {
             $loginResponse = $this->authService->refreshAccessToken($refreshTokenRequest, $roleName);
@@ -83,6 +82,7 @@ class AuthController extends AbstractController
                 'strict'
             )
         );
+
         return $response;
     }
 
@@ -96,10 +96,11 @@ class AuthController extends AbstractController
             $this->authService->logout($user, $roleName);
             $response = $this->json(['message' => 'Successfully logged out']);
             $response->headers->clearCookie('access_token');
+
             return $response;
         } catch (\Exception $e) {
             return $this->json([
-                'error' => 'Logout failed: ' . $e->getMessage()
+                'error' => 'Logout failed: '.$e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         }
     }

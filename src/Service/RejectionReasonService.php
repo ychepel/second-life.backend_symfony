@@ -10,8 +10,9 @@ class RejectionReasonService
 {
     public function __construct(
         private readonly RejectionReasonRepository $rejectionReasonRepository,
-        private readonly RejectionReasonMappingService $mappingService
-    ) { }
+        private readonly RejectionReasonMappingService $mappingService,
+    ) {
+    }
 
     public function getAll(): array
     {

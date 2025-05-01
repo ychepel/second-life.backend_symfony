@@ -36,13 +36,11 @@ class ImageService
         private readonly ValidatorInterface $validator,
         private readonly TranslatorInterface $translator,
         private readonly FilterManager $filterManager,
-        private readonly LoggerInterface $logger
-    ) {}
+        private readonly LoggerInterface $logger,
+    ) {
+    }
 
     /**
-     * @param string $entityType
-     * @param int $entityId
-     * @param array $baseNames
      * @return Image[]
      */
     public function attachImages(string $entityType, int $entityId, array $baseNames): array
@@ -63,7 +61,7 @@ class ImageService
 
         $updatedCount = $query->execute();
 
-        if ($updatedCount === 0) {
+        if (0 === $updatedCount) {
             $this->logger->warning(
                 "Failed to attach images to entity `$entityType`",
                 ['entityId' => $entityId, 'baseNames' => $baseNames]
@@ -88,7 +86,7 @@ class ImageService
         ?int $entityId,
         $user,
         $imageRepository,
-        $offerRepository
+        $offerRepository,
     ): array {
         if (!in_array($entityType, ['offer', 'user', 'category'])) {
             throw new ServiceException($this->translator->trans('Invalid entity type'));
@@ -100,16 +98,16 @@ class ImageService
         $constraints = new File([
             'maxSize' => self::MAX_FILE_SIZE,
             'mimeTypes' => self::ALLOWED_IMAGE_TYPES,
-            'mimeTypesMessage' => $this->translator->trans('Please upload a valid image file (JPEG or PNG)')
+            'mimeTypesMessage' => $this->translator->trans('Please upload a valid image file (JPEG or PNG)'),
         ]);
         $errors = $this->validator->validate($file, $constraints);
         if (count($errors) > 0) {
             throw new ServiceException($errors[0]->getMessage());
         }
 
-        if ($entityId !== null) {
-            //TODO: refactor validation
-            if ($entityType === 'offer') {
+        if (null !== $entityId) {
+            // TODO: refactor validation
+            if ('offer' === $entityType) {
                 $offer = $offerRepository->findOneBy(['id' => $entityId, 'user' => $user]);
                 if (!$offer) {
                     throw new AccessException($this->translator->trans('Access denied'));
@@ -118,7 +116,7 @@ class ImageService
                 if (count($offerImages) >= self::MAX_OFFER_IMAGES) {
                     throw new ServiceException($this->translator->trans('Maximum number of images reached'));
                 }
-            } elseif ($entityType === 'user') {
+            } elseif ('user' === $entityType) {
                 if ($entityId !== $user->getId()) {
                     throw new AccessException($this->translator->trans('Access denied'));
                 }
@@ -126,8 +124,8 @@ class ImageService
                 if (count($userImages) >= self::MAX_USER_IMAGES) {
                     throw new ServiceException($this->translator->trans('Maximum number of images reached'));
                 }
-            } elseif ($entityType === 'category') {
-                if ($user->getRole() !== UserRole::ROLE_ADMIN) {
+            } elseif ('category' === $entityType) {
+                if (UserRole::ROLE_ADMIN !== $user->getRole()) {
                     throw new AccessException($this->translator->trans('Access denied'));
                 }
                 $categoryImages = $imageRepository->findBy(['entityType' => 'category', 'entityId' => $entityId]);
@@ -155,24 +153,24 @@ class ImageService
         string $baseName,
         $user,
         $imageRepository,
-        $offerRepository
+        $offerRepository,
     ): void {
         $image = $imageRepository->findOneBy(['baseName' => $baseName]);
         if (!$image) {
             throw new ServiceException($this->translator->trans('Image not found'));
         }
 
-        if ($image->getEntityType() === 'offer') {
+        if ('offer' === $image->getEntityType()) {
             $offer = $offerRepository->findOneBy(['id' => $image->getEntityId()]);
             if (!$offer || $offer->getUser() !== $user) {
                 throw new AccessException($this->translator->trans('Access denied'));
             }
-        } elseif ($image->getEntityType() === 'user') {
+        } elseif ('user' === $image->getEntityType()) {
             if ($image->getEntityId() !== $user->getId()) {
                 throw new AccessException($this->translator->trans('Access denied'));
             }
-        } elseif ($image->getEntityType() === 'category') {
-            if ($user->getRole() !== UserRole::ROLE_ADMIN) {
+        } elseif ('category' === $image->getEntityType()) {
+            if (UserRole::ROLE_ADMIN !== $user->getRole()) {
                 throw new AccessException($this->translator->trans('Access denied'));
             }
         }
@@ -200,7 +198,7 @@ class ImageService
             $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
             $filePath = sprintf(
                 '%s/%s/%s/%s_%s.%s',
-                $this->env === 'test' ? 'test-images' : 'images',
+                'test' === $this->env ? 'test-images' : 'images',
                 $entityType,
                 $entityId ?: self::TMP_FOLDER_NAME,
                 $filterName,
@@ -208,11 +206,11 @@ class ImageService
                 $extension
             );
             $fs = new Filesystem();
-            $fs->mkdir(dirname($directory . $filePath));
-            file_put_contents($directory . $filePath, $processedContent);
+            $fs->mkdir(dirname($directory.$filePath));
+            file_put_contents($directory.$filePath, $processedContent);
             $this->createImageEntity($baseName, $entityType, $entityId, $filterName, $filePath);
         } catch (\Exception $e) {
-            throw new ServiceException('Error processing image: ' . $e->getMessage(), 0, $e);
+            throw new ServiceException('Error processing image: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -256,7 +254,7 @@ class ImageService
         /** @var Image $image */
         foreach ($images as $image) {
             $oldPath = $image->getFullPath();
-            $newPath = str_replace('/' . self::TMP_FOLDER_NAME . '/', "/{$image->getEntityId()}/", $oldPath);
+            $newPath = str_replace('/'.self::TMP_FOLDER_NAME.'/', "/{$image->getEntityId()}/", $oldPath);
             $fs = new Filesystem();
             $targetDir = dirname($newPath);
 
@@ -270,6 +268,7 @@ class ImageService
                     'exception' => $e->getMessage(),
                     'imageId' => $image->getId(),
                     'entityId' => $image->getEntityId()]);
+
                 return;
             }
 

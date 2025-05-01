@@ -11,7 +11,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class AdminFixture extends Fixture
 {
     public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
-    {}
+    {
+    }
 
     public function load(ObjectManager $manager): void
     {

@@ -8,11 +8,6 @@ class LoginResponseDto
     private string $accessToken;
     private string $refreshToken;
 
-    /**
-     * @param int $clientId
-     * @param string $accessToken
-     * @param string $refreshToken
-     */
     public function __construct(int $clientId, string $accessToken, string $refreshToken)
     {
         $this->clientId = $clientId;
@@ -28,6 +23,7 @@ class LoginResponseDto
     public function setClientId(int $clientId): self
     {
         $this->clientId = $clientId;
+
         return $this;
     }
 
@@ -39,6 +35,7 @@ class LoginResponseDto
     public function setAccessToken(string $accessToken): self
     {
         $this->accessToken = $accessToken;
+
         return $this;
     }
 
@@ -50,6 +47,7 @@ class LoginResponseDto
     public function setRefreshToken(string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
+
         return $this;
     }
 }

@@ -22,6 +22,7 @@ class LoginRequestDto
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -33,6 +34,7 @@ class LoginRequestDto
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
         return $this;
     }
 }

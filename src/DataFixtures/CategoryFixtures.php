@@ -13,44 +13,44 @@ class CategoryFixtures extends Fixture
         $categories = [
             [
                 'name' => 'Electronics and Gadgets',
-                'description' => 'Smartphones,Laptops,Televisions,Peripherals'
+                'description' => 'Smartphones,Laptops,Televisions,Peripherals',
             ],
             [
                 'name' => 'Furniture and Home Decor',
-                'description' => 'Sofas,Tables and Chairs,Cabinets and Shelves,Decor and Accessories'
+                'description' => 'Sofas,Tables and Chairs,Cabinets and Shelves,Decor and Accessories',
             ],
             [
                 'name' => 'Clothing and Accessories',
-                'description' => 'Men\'s Clothing,Women\'s Clothing,Footwear,Bags and Backpacks'
+                'description' => 'Men\'s Clothing,Women\'s Clothing,Footwear,Bags and Backpacks',
             ],
             [
                 'name' => 'Vehicles',
-                'description' => 'Cars,Motorcycles and Scooters,Bicycles,Auto Parts'
+                'description' => 'Cars,Motorcycles and Scooters,Bicycles,Auto Parts',
             ],
             [
                 'name' => 'Kids\' Items',
-                'description' => 'Toys,Children\'s Clothing,Strollers,Educational Materials'
+                'description' => 'Toys,Children\'s Clothing,Strollers,Educational Materials',
             ],
             [
                 'name' => 'Sports and Leisure',
-                'description' => 'Sports Equipment,Camping Gear,Bicycles,Fishing Gear'
+                'description' => 'Sports Equipment,Camping Gear,Bicycles,Fishing Gear',
             ],
             [
                 'name' => 'Home Appliances',
-                'description' => 'Kitchen Appliances,Washing Machines,Vacuum Cleaners,Air Conditioners'
+                'description' => 'Kitchen Appliances,Washing Machines,Vacuum Cleaners,Air Conditioners',
             ],
             [
                 'name' => 'Hobbies and Interests',
-                'description' => 'Musical Instruments,Books and Magazines,Collectibles,Board Games'
+                'description' => 'Musical Instruments,Books and Magazines,Collectibles,Board Games',
             ],
             [
                 'name' => 'Garden and Outdoor',
-                'description' => 'Garden Tools,Plants and Seeds,Garden Furniture,Watering Equipment'
+                'description' => 'Garden Tools,Plants and Seeds,Garden Furniture,Watering Equipment',
             ],
             [
                 'name' => 'Pets and Supplies',
-                'description' => 'Pets,Pet Food and Accessories,Cages and Aquariums,Pet Services'
-            ]
+                'description' => 'Pets,Pet Food and Accessories,Cages and Aquariums,Pet Services',
+            ],
         ];
 
         foreach ($categories as $categoryData) {

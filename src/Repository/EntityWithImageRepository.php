@@ -15,7 +15,7 @@ class EntityWithImageRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry, private readonly LoggerInterface $logger)
     {
         $repositoryName = static::class;
-        $this->className = 'App\Entity\\' . str_replace('Repository', '', basename(str_replace('\\', '/', $repositoryName)));
+        $this->className = 'App\Entity\\'.str_replace('Repository', '', basename(str_replace('\\', '/', $repositoryName)));
 
         parent::__construct($registry, $this->className);
     }
@@ -27,7 +27,7 @@ class EntityWithImageRepository extends ServiceEntityRepository
             foreach ($this->getQueryResults($conditions) as $object) {
                 if ($object instanceof $this->className) {
                     $result = $object;
-                } elseif ($result !== null && $object instanceof Image) {
+                } elseif (null !== $result && $object instanceof Image) {
                     $currentImages = $result->getImages();
                     $currentImages[] = $object;
                     $result->setImages($currentImages);
@@ -36,7 +36,7 @@ class EntityWithImageRepository extends ServiceEntityRepository
 
             return $result;
         } catch (\Throwable $e) {
-            $this->logger->error('Cannot retrieve object with images', ['exception' => $e->getMessage()] );
+            $this->logger->error('Cannot retrieve object with images', ['exception' => $e->getMessage()]);
         }
 
         return null;
@@ -60,7 +60,7 @@ class EntityWithImageRepository extends ServiceEntityRepository
 
             return $collection;
         } catch (\Throwable $e) {
-            $this->logger->error('Cannot retrieve objects with images', ['exception' => $e->getMessage()] );
+            $this->logger->error('Cannot retrieve objects with images', ['exception' => $e->getMessage()]);
         }
 
         return [];
@@ -75,7 +75,7 @@ class EntityWithImageRepository extends ServiceEntityRepository
             ->leftJoin(Image::class, 'i', Join::WITH, 'i.entityId = e.id AND i.entityType = :type')
             ->setParameter('type', $entityType);
 
-        foreach($conditions as $field => $value) {
+        foreach ($conditions as $field => $value) {
             $queryBuilder->andWhere("e.$field = :$field")
                 ->setParameter($field, $value);
         }

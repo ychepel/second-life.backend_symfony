@@ -4,7 +4,8 @@ namespace App\Dto;
 
 class RejectionReasonDto
 {
-    public function __construct(private int $id, private string $name) {
+    public function __construct(private int $id, private string $name)
+    {
     }
 
     public function getId(): int
@@ -26,6 +27,4 @@ class RejectionReasonDto
     {
         $this->name = $name;
     }
-
-
 }

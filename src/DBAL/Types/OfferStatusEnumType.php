@@ -2,8 +2,8 @@
 
 namespace App\DBAL\Types;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
 use App\Enum\OfferStatus;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 
 class OfferStatusEnumType extends Type
@@ -12,11 +12,11 @@ class OfferStatusEnumType extends Type
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?OfferStatus
     {
-        if ($value === null) {
+        if (null === $value) {
             return null;
         }
 
-        $enum = OfferStatus::tryFrom((int)$value);
+        $enum = OfferStatus::tryFrom((int) $value);
 
         if (!$enum) {
             throw new \InvalidArgumentException("Invalid offer status value '{$value}' found.");
@@ -27,16 +27,12 @@ class OfferStatusEnumType extends Type
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform): ?int
     {
-        if ($value === null) {
+        if (null === $value) {
             return null;
         }
 
         if (!$value instanceof OfferStatus) {
-            throw new \InvalidArgumentException(sprintf(
-                'Invalid value type: expected "%s", got "%s"',
-                OfferStatus::class,
-                get_debug_type($value)
-            ));
+            throw new \InvalidArgumentException(sprintf('Invalid value type: expected "%s", got "%s"', OfferStatus::class, get_debug_type($value)));
         }
 
         return $value->value;

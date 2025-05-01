@@ -61,6 +61,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -82,6 +83,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
+
         return $this;
     }
 
@@ -93,6 +95,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
+
         return $this;
     }
 
@@ -104,6 +107,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
@@ -125,6 +129,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     public function setRole(UserRole $role): self
     {
         $this->role = $role;
+
         return $this;
     }
 
@@ -145,7 +150,6 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
 
     public function eraseCredentials(): void
     {
-
     }
 
     public function getUserIdentifier(): string
@@ -169,7 +173,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface, EntityW
     {
         $this->updatedAt = new \DateTime();
 
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

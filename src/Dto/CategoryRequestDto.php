@@ -3,13 +3,12 @@
 namespace App\Dto;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator as AppAssert;
 
 class CategoryRequestDto
 {
     #[Assert\All([
         new Assert\NotBlank(),
-        new Assert\Uuid()
+        new Assert\Uuid(),
     ])]
     private array $baseNameOfImages = [];
 
@@ -20,18 +19,12 @@ class CategoryRequestDto
     #[Assert\Length(min: 0, max: 1000)]
     private string $description;
 
-    /**
-     * @param array $baseNameOfImages
-     * @param string $name
-     * @param string $description
-     */
     public function __construct(array $baseNameOfImages, string $name, string $description)
     {
         $this->baseNameOfImages = $baseNameOfImages;
         $this->name = $name;
         $this->description = $description;
     }
-
 
     public function getBaseNameOfImages(): array
     {
@@ -71,6 +64,4 @@ class CategoryRequestDto
             $this->description
         );
     }
-
-
 }

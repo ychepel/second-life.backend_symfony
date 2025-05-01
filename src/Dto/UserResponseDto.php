@@ -38,6 +38,7 @@ class UserResponseDto
     public function setId(int $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -49,6 +50,7 @@ class UserResponseDto
     public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
+
         return $this;
     }
 
@@ -60,6 +62,7 @@ class UserResponseDto
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
+
         return $this;
     }
 
@@ -71,6 +74,7 @@ class UserResponseDto
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -82,6 +86,7 @@ class UserResponseDto
     public function setCreatedAt(\DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
+
         return $this;
     }
 
@@ -93,6 +98,7 @@ class UserResponseDto
     public function setLocationId(?int $locationId): self
     {
         $this->locationId = $locationId;
+
         return $this;
     }
 
@@ -104,6 +110,7 @@ class UserResponseDto
     public function setLastActive(\DateTime $lastActive): self
     {
         $this->lastActive = $lastActive;
+
         return $this;
     }
 
@@ -115,6 +122,7 @@ class UserResponseDto
     public function setImages(array $images): self
     {
         $this->images = $images;
+
         return $this;
     }
 }

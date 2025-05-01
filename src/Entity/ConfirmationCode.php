@@ -36,6 +36,7 @@ class ConfirmationCode
     public function setCode(string $code): self
     {
         $this->code = $code;
+
         return $this;
     }
 
@@ -47,6 +48,7 @@ class ConfirmationCode
     public function setUser(User $user): self
     {
         $this->user = $user;
+
         return $this;
     }
 
@@ -58,6 +60,7 @@ class ConfirmationCode
     public function setExpired(\DateTime $expired): self
     {
         $this->expired = $expired;
+
         return $this;
     }
 }

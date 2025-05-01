@@ -24,7 +24,7 @@ class LocationControllerTest extends ControllerTest
         $locations = [
             ['id' => 1, 'name' => 'Baden-Württemberg'],
             ['id' => 2, 'name' => 'Bayern'],
-            ['id' => 3, 'name' => 'Berlin']
+            ['id' => 3, 'name' => 'Berlin'],
         ];
 
         foreach ($locations as $locationData) {
@@ -43,10 +43,10 @@ class LocationControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('locations', $responseData);
         $this->assertIsArray($responseData['locations']);
-        
+
         foreach ($responseData['locations'] as $location) {
             $this->assertArrayHasKey('id', $location);
             $this->assertArrayHasKey('name', $location);
@@ -61,7 +61,7 @@ class LocationControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('id', $responseData);
         $this->assertArrayHasKey('name', $responseData);
         $this->assertEquals(2, $responseData['id']);

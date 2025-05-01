@@ -4,7 +4,8 @@ namespace App\Dto;
 
 class LocationDto
 {
-    public function __construct(private int $id, private string $name) {
+    public function __construct(private int $id, private string $name)
+    {
     }
 
     public function getId(): int
@@ -26,6 +27,4 @@ class LocationDto
     {
         $this->name = $name;
     }
-
-
 }

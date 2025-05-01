@@ -11,7 +11,8 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 class UniqueUserEmailValidator extends ConstraintValidator
 {
     public function __construct(private readonly UserRepository $userRepository)
-    { }
+    {
+    }
 
     public function validate(mixed $value, Constraint $constraint): void
     {
@@ -29,7 +30,7 @@ class UniqueUserEmailValidator extends ConstraintValidator
 
         $existingUser = $this->userRepository->findOneBy(['email' => $value]);
 
-        if ($existingUser !== null) {
+        if (null !== $existingUser) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $this->formatValue($value))
                 ->addViolation();

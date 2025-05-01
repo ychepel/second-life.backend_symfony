@@ -36,8 +36,8 @@ abstract class ControllerTest extends WebTestCase
     protected function apiRequest(string $method, string $url, array $data = [], array $files = [], string $accessToken = ''): Response
     {
         $server = ['HTTP_ACCEPT' => 'application/json'];
-        if ($accessToken !== '') {
-            $server['HTTP_AUTHORIZATION'] = 'Bearer ' . $accessToken;
+        if ('' !== $accessToken) {
+            $server['HTTP_AUTHORIZATION'] = 'Bearer '.$accessToken;
         }
         $content = null;
 

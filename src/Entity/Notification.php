@@ -44,6 +44,7 @@ class Notification
     public function setAuthenticatedUserId(int $authenticatedUserId): self
     {
         $this->authenticatedUserId = $authenticatedUserId;
+
         return $this;
     }
 
@@ -55,6 +56,7 @@ class Notification
     public function setReceiverRole(string $receiverRole): self
     {
         $this->receiverRole = $receiverRole;
+
         return $this;
     }
 
@@ -66,6 +68,7 @@ class Notification
     public function setContextId(?int $contextId): self
     {
         $this->contextId = $contextId;
+
         return $this;
     }
 
@@ -77,6 +80,7 @@ class Notification
     public function setNotificationType(string $notificationType): self
     {
         $this->notificationType = $notificationType;
+
         return $this;
     }
 
@@ -93,13 +97,14 @@ class Notification
     public function setSentAt(?\DateTime $sentAt): self
     {
         $this->sentAt = $sentAt;
+
         return $this;
     }
 
     #[ORM\PrePersist]
     public function updateTimestamps(): void
     {
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

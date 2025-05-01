@@ -49,6 +49,7 @@ class Image
     public function setEntityId(?int $entityId): self
     {
         $this->entityId = $entityId;
+
         return $this;
     }
 
@@ -60,6 +61,7 @@ class Image
     public function setEntityType(string $entityType): self
     {
         $this->entityType = $entityType;
+
         return $this;
     }
 
@@ -71,6 +73,7 @@ class Image
     public function setSize(string $size): self
     {
         $this->size = $size;
+
         return $this;
     }
 
@@ -82,6 +85,7 @@ class Image
     public function setBaseName(string $baseName): self
     {
         $this->baseName = $baseName;
+
         return $this;
     }
 
@@ -93,6 +97,7 @@ class Image
     public function setFullPath(string $fullPath): self
     {
         $this->fullPath = $fullPath;
+
         return $this;
     }
 
@@ -112,7 +117,7 @@ class Image
     {
         $this->updatedAt = new \DateTime();
 
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

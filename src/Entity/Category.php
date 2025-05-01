@@ -39,6 +39,7 @@ class Category implements EntityWithImage
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -50,6 +51,7 @@ class Category implements EntityWithImage
     public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
@@ -61,6 +63,7 @@ class Category implements EntityWithImage
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 

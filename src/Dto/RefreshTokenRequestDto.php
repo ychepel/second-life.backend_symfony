@@ -18,6 +18,7 @@ class RefreshTokenRequestDto
     public function setRefreshToken(string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
+
         return $this;
     }
 }

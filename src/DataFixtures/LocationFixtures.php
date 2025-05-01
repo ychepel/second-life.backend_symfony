@@ -24,7 +24,7 @@ class LocationFixtures extends Fixture
             ['id' => 11, 'name' => 'Sachsen'],
             ['id' => 12, 'name' => 'Sachsen-Anhalt'],
             ['id' => 13, 'name' => 'Schleswig-Holstein'],
-            ['id' => 14, 'name' => 'Thüringen']
+            ['id' => 14, 'name' => 'Thüringen'],
         ];
 
         foreach ($locations as $locationData) {

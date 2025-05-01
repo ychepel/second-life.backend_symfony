@@ -6,7 +6,6 @@ use App\Entity\Category;
 use App\Entity\Image;
 use App\Entity\User;
 use App\Enum\UserRole;
-use App\Mapper\CategoryMappingService;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +17,7 @@ class CategoryControllerTest extends ControllerTest
         'email' => 'admin@example.com',
         'password' => 'Qwerty!123',
         'firstName' => 'Admin',
-        'lastName' => 'User'
+        'lastName' => 'User',
     ];
 
     protected function setUp(): void
@@ -51,18 +50,18 @@ class CategoryControllerTest extends ControllerTest
             [
                 'name' => 'Electronics and gadgets',
                 'description' => 'Smartphones,Laptops,Televisions,Peripherals',
-                'active' => true
+                'active' => true,
             ],
             [
                 'name' => 'Furniture and Home Decor',
                 'description' => 'Sofas,Tables and Chairs,Cabinets and Shelves,Decor and Accessories',
-                'active' => true
+                'active' => true,
             ],
             [
                 'name' => 'Inactive Category',
                 'description' => 'This category is inactive',
-                'active' => false
-            ]
+                'active' => false,
+            ],
         ];
 
         foreach ($categories as $categoryData) {
@@ -77,33 +76,33 @@ class CategoryControllerTest extends ControllerTest
             [
                 'baseName' => '47424034-00e8-4358-b352-e16023279883',
                 'size' => '1024x1024',
-                'fullPath' => '/category/1024x1024_47424034-00e8-4358-b352-e16023279883.jpg'
+                'fullPath' => '/category/1024x1024_47424034-00e8-4358-b352-e16023279883.jpg',
             ],
             [
                 'baseName' => '47424034-00e8-4358-b352-e16023279883',
                 'size' => '320x320',
-                'fullPath' => '/category/320x320_47424034-00e8-4358-b352-e16023279883.jpg'
+                'fullPath' => '/category/320x320_47424034-00e8-4358-b352-e16023279883.jpg',
             ],
             [
                 'baseName' => '47424034-00e8-4358-b352-e16023279883',
                 'size' => '64x64',
-                'fullPath' => '/category/64x64_47424034-00e8-4358-b352-e16023279883.jpg'
+                'fullPath' => '/category/64x64_47424034-00e8-4358-b352-e16023279883.jpg',
             ],
             [
                 'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
                 'size' => '1024x1024',
-                'fullPath' => '/category/1024x1024_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
+                'fullPath' => '/category/1024x1024_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg',
             ],
             [
                 'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
                 'size' => '320x320',
-                'fullPath' => '/category/320x320_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
+                'fullPath' => '/category/320x320_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg',
             ],
             [
                 'baseName' => 'a1b2c3d4-e5f6-7890-1234-56789abcdef0',
                 'size' => '64x64',
-                'fullPath' => '/category/64x64_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg'
-            ]
+                'fullPath' => '/category/64x64_a1b2c3d4-e5f6-7890-1234-56789abcdef0.jpg',
+            ],
         ];
         foreach ($images as $imageData) {
             $image = new Image();
@@ -124,7 +123,7 @@ class CategoryControllerTest extends ControllerTest
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        
+
         $this->assertArrayHasKey('images', $responseData);
         $this->assertArrayHasKey('values', $responseData['images']);
         $this->assertArrayHasKey('47424034-00e8-4358-b352-e16023279883', $responseData['images']['values']);
@@ -180,7 +179,7 @@ class CategoryControllerTest extends ControllerTest
         // Login as admin to get access token
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
@@ -237,7 +236,7 @@ class CategoryControllerTest extends ControllerTest
         // Login as regular user
         $loginRequest = [
             'email' => 'user@example.com',
-            'password' => 'Qwerty!123'
+            'password' => 'Qwerty!123',
         ];
 
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
@@ -251,7 +250,8 @@ class CategoryControllerTest extends ControllerTest
 
     private function createTestFile(): UploadedFile
     {
-        $file = new \SplFileInfo(__DIR__ . '/fixtures/test.jpg');
+        $file = new \SplFileInfo(__DIR__.'/fixtures/test.jpg');
+
         return new UploadedFile(
             $file->getPathname(),
             'test.jpg',
@@ -265,7 +265,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -274,7 +274,7 @@ class CategoryControllerTest extends ControllerTest
         $file = $this->createTestFile();
         $imageResponse = $this->apiRequest('POST', '/api/v1/images', [
             'entityType' => 'category',
-            'entityId' => null
+            'entityId' => null,
         ], ['file' => $file], accessToken: $accessToken);
         $this->assertEquals(Response::HTTP_OK, $imageResponse->getStatusCode());
         $imageData = json_decode($imageResponse->getContent(), true);
@@ -283,7 +283,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => $baseNameOfImages,
             'name' => 'New Category',
-            'description' => 'Some description'
+            'description' => 'Some description',
         ];
 
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
@@ -299,7 +299,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -308,7 +308,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => ['not-a-uuid'],
             'name' => '',
-            'description' => str_repeat('a', 1001)
+            'description' => str_repeat('a', 1001),
         ];
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -324,7 +324,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -333,7 +333,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [Uuid::v4()->toString()],
             'name' => 'Test category',
-            'description' => 'Test description'
+            'description' => 'Test description',
         ];
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -346,7 +346,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -355,7 +355,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Electronics and gadgets',
-            'description' => 'Duplicate name category'
+            'description' => 'Duplicate name category',
         ];
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_CONFLICT, $response->getStatusCode());
@@ -369,7 +369,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Should Fail',
-            'description' => 'Should Fail'
+            'description' => 'Should Fail',
         ];
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData);
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
@@ -389,7 +389,7 @@ class CategoryControllerTest extends ControllerTest
 
         $loginRequest = [
             'email' => 'user@example.com',
-            'password' => 'Qwerty!123'
+            'password' => 'Qwerty!123',
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -398,7 +398,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Should Fail',
-            'description' => 'Should Fail'
+            'description' => 'Should Fail',
         ];
         $response = $this->apiRequest('POST', '/api/v1/categories', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
@@ -408,7 +408,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -417,7 +417,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Updated Category',
-            'description' => 'Updated description'
+            'description' => 'Updated description',
         ];
         $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -430,7 +430,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -439,7 +439,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Any',
-            'description' => 'Any'
+            'description' => 'Any',
         ];
         $response = $this->apiRequest('PUT', '/api/v1/categories/9999', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
@@ -451,7 +451,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -460,7 +460,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => ['not-a-uuid'],
             'name' => '',
-            'description' => str_repeat('a', 1001)
+            'description' => str_repeat('a', 1001),
         ];
         $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $accessToken);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
@@ -473,7 +473,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Should Fail',
-            'description' => 'Should Fail'
+            'description' => 'Should Fail',
         ];
         $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData);
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
@@ -484,7 +484,7 @@ class CategoryControllerTest extends ControllerTest
         $requestData = [
             'baseNameOfImages' => [],
             'name' => 'Should Fail',
-            'description' => 'Should Fail'
+            'description' => 'Should Fail',
         ];
         $response = $this->apiRequest('PUT', '/api/v1/categories/1', $requestData, [], $this->getAccessTokenForNewUser());
         $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
@@ -494,7 +494,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -511,7 +511,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -539,7 +539,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -557,7 +557,7 @@ class CategoryControllerTest extends ControllerTest
     {
         $loginRequest = [
             'email' => self::TEST_ADMIN_DATA['email'],
-            'password' => self::TEST_ADMIN_DATA['password']
+            'password' => self::TEST_ADMIN_DATA['password'],
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/admin/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);
@@ -601,7 +601,7 @@ class CategoryControllerTest extends ControllerTest
 
         $loginRequest = [
             'email' => 'user@example.com',
-            'password' => 'Qwerty!123'
+            'password' => 'Qwerty!123',
         ];
         $loginResponse = $this->apiRequest('POST', '/api/v1/auth/user/login', $loginRequest);
         $loginData = json_decode($loginResponse->getContent(), true);

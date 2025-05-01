@@ -14,8 +14,9 @@ class LocationController extends AbstractController
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly LocationService $locationService
-    ) { }
+        private readonly LocationService $locationService,
+    ) {
+    }
 
     #[Route('', name: 'locations_list', methods: ['GET'])]
     public function getLocations(): JsonResponse
@@ -25,10 +26,10 @@ class LocationController extends AbstractController
 
             return $this->json(['locations' => $locations]);
         } catch (\Exception $e) {
-            $this->logger->error('Error getting locations: ' . $e->getMessage());
+            $this->logger->error('Error getting locations: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -39,14 +40,14 @@ class LocationController extends AbstractController
         try {
             $locationDto = $this->locationService->getById($id);
         } catch (\Exception $e) {
-            $this->logger->error('Error getting location: ' . $e->getMessage());
+            $this->logger->error('Error getting location: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if ($locationDto === null) {
+        if (null === $locationDto) {
             return $this->json(['error' => 'Location not found'], Response::HTTP_NOT_FOUND);
         }
 

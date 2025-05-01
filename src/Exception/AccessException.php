@@ -2,9 +2,6 @@
 
 namespace App\Exception;
 
-use RuntimeException;
-
-class AccessException extends RuntimeException
+class AccessException extends \RuntimeException
 {
-
 }

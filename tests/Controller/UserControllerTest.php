@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\Image;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,12 +11,12 @@ class UserControllerTest extends ControllerTest
         'firstName' => 'John',
         'lastName' => 'Smith',
         'email' => 'user@mail.com',
-        'password' => 'Qwerty!123'
+        'password' => 'Qwerty!123',
     ];
 
     public function testRegisterUserSuccess(): void
     {
-        $response = $this->apiRequest('POST','/api/v1/users/register',self::TEST_USER_DATA);
+        $response = $this->apiRequest('POST', '/api/v1/users/register', self::TEST_USER_DATA);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
         $responseData = json_decode($response->getContent(), true);
@@ -46,7 +45,7 @@ class UserControllerTest extends ControllerTest
         $data = self::TEST_USER_DATA;
         $data['email'] = 'invalid-email';
 
-        $response = $this->apiRequest('POST','/api/v1/users/register',$data);
+        $response = $this->apiRequest('POST', '/api/v1/users/register', $data);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -59,7 +58,7 @@ class UserControllerTest extends ControllerTest
         $data = self::TEST_USER_DATA;
         $data['password'] = 'weak';
 
-        $response = $this->apiRequest('POST','/api/v1/users/register',$data);
+        $response = $this->apiRequest('POST', '/api/v1/users/register', $data);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
@@ -70,11 +69,11 @@ class UserControllerTest extends ControllerTest
     public function testRegisterUserWithExistingEmail(): void
     {
         // First registration
-        $response1 = $this->apiRequest('POST','/api/v1/users/register', self::TEST_USER_DATA);
+        $response1 = $this->apiRequest('POST', '/api/v1/users/register', self::TEST_USER_DATA);
         $this->assertEquals(Response::HTTP_CREATED, $response1->getStatusCode());
 
         // Second registration with same email
-        $response2 = $this->apiRequest('POST','/api/v1/users/register', self::TEST_USER_DATA);
+        $response2 = $this->apiRequest('POST', '/api/v1/users/register', self::TEST_USER_DATA);
         $this->assertEquals(Response::HTTP_BAD_REQUEST, $response2->getStatusCode());
         $responseData = json_decode($response2->getContent(), true);
         $this->assertArrayHasKey('errors', $responseData);

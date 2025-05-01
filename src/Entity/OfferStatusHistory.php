@@ -17,7 +17,7 @@ class OfferStatusHistory
     #[ORM\Column(type: 'integer')]
     private ?int $offerId = null;
 
-    #[ORM\Column(type: "offer_status_enum", nullable: false)]
+    #[ORM\Column(type: 'offer_status_enum', nullable: false)]
     private OfferStatus $status;
 
     #[ORM\Column(type: 'datetime')]
@@ -40,6 +40,7 @@ class OfferStatusHistory
     public function setOfferId(int $offerId): self
     {
         $this->offerId = $offerId;
+
         return $this;
     }
 
@@ -51,6 +52,7 @@ class OfferStatusHistory
     public function setStatus(OfferStatus $status): self
     {
         $this->status = $status;
+
         return $this;
     }
 
@@ -67,13 +69,14 @@ class OfferStatusHistory
     public function setRejectionReason(?RejectionReason $rejectionReason): self
     {
         $this->rejectionReason = $rejectionReason;
+
         return $this;
     }
 
     #[ORM\PrePersist]
     public function updateTimestamps(): void
     {
-        if ($this->createdAt === null) {
+        if (null === $this->createdAt) {
             $this->createdAt = new \DateTime();
         }
     }

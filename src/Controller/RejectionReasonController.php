@@ -17,17 +17,17 @@ class RejectionReasonController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function getRejectionReasons(
         RejectionReasonService $rejectionReasonService,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ): JsonResponse {
         try {
             $reasons = $rejectionReasonService->getAll();
 
             return $this->json(['reasons' => $reasons]);
         } catch (\Exception $e) {
-            $logger->error('Error getting rejection reasons: ' . $e->getMessage());
+            $logger->error('Error getting rejection reasons: '.$e->getMessage());
 
             return $this->json([
-                'error' => 'Internal server error'
+                'error' => 'Internal server error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
