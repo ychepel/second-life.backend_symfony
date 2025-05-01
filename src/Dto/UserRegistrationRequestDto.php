@@ -5,11 +5,11 @@ namespace App\Dto;
 use App\Validator as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UserRegistrationRequestDto
+class UserRegistrationRequestDto implements \Stringable
 {
     #[Assert\All([
         new Assert\NotBlank(),
-        //        new Assert\Uuid()
+        new Assert\Uuid(),
     ])]
     private array $baseNameOfImages = [];
 

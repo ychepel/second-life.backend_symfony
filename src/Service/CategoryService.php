@@ -37,14 +37,10 @@ class CategoryService
         $categories = $repository->getAllWithImages();
 
         if ($activeOnly) {
-            $categories = array_filter($categories, function (Category $category) {
-                return $category->isActive();
-            });
+            $categories = array_filter($categories, fn(Category $category) => $category->isActive());
         }
 
-        return array_map(function (Category $category) {
-            return $this->mappingService->toDto($category);
-        }, $categories);
+        return array_map(fn(Category $category) => $this->mappingService->toDto($category), $categories);
     }
 
     /**

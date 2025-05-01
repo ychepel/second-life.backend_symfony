@@ -23,15 +23,6 @@ class RefreshToken
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 600, unique: true)]
-    private string $token;
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $invalidationDate;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $email;
-
     #[ORM\Column(type: 'string', length: 255)]
     private string $role;
 
@@ -39,14 +30,14 @@ class RefreshToken
     private \DateTimeImmutable $createdAt;
 
     public function __construct(
-        string $token,
-        \DateTimeImmutable $invalidationDate,
-        string $email,
+        #[ORM\Column(type: 'string', length: 600, unique: true)]
+        private string $token,
+        #[ORM\Column(type: 'datetime_immutable')]
+        private \DateTimeImmutable $invalidationDate,
+        #[ORM\Column(type: 'string', length: 255)]
+        private string $email,
         UserRole $role,
     ) {
-        $this->token = $token;
-        $this->invalidationDate = $invalidationDate;
-        $this->email = $email;
         $this->role = $role->value;
         $this->createdAt = new \DateTimeImmutable();
     }

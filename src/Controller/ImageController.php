@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1/images')]
 class ImageController extends AbstractController
 {
     public function __construct(
@@ -25,8 +24,7 @@ class ImageController extends AbstractController
         private readonly OfferRepository $offerRepository,
     ) {
     }
-
-    #[Route('', name: 'image_upload', methods: ['POST'])]
+    #[Route('/api/v1/images', name: 'image_upload', methods: ['POST'])]
     public function uploadImage(Request $request): JsonResponse
     {
         try {
@@ -55,8 +53,7 @@ class ImageController extends AbstractController
             return $this->json(['error' => 'Internal server error'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    #[Route('', name: 'image_delete', methods: ['DELETE'])]
+    #[Route('/api/v1/images', name: 'image_delete', methods: ['DELETE'])]
     public function deleteImage(Request $request): JsonResponse
     {
         try {

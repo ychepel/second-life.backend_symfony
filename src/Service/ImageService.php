@@ -47,7 +47,7 @@ class ImageService
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $query = $queryBuilder
-            ->update('App\Entity\Image', 'i')
+            ->update(Image::class, 'i')
             ->set('i.entityId', ':newEntityId')
             ->set('i.updatedAt', ':updatedAt')
             ->where($queryBuilder->expr()->in('i.baseName', ':baseNames'))
@@ -72,7 +72,7 @@ class ImageService
         /** @var ImageRepository $imageRepository */
         $imageRepository = $this->entityManager->getRepository(Image::class);
         $images = $imageRepository->findAllByBaseNames($baseNames);
-        $this->moveImagesToPermanentFolder($images, $entityId);
+        $this->moveImagesToPermanentFolder($images);
 
         return $images;
     }
@@ -195,7 +195,7 @@ class ImageService
             $processedBinary = $this->filterManager->applyFilter($binary, $filterName);
             $processedContent = $processedBinary->getContent();
             $directory = $this->getDirectory();
-            $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+            $extension = pathinfo((string) $file->getClientOriginalName(), PATHINFO_EXTENSION);
             $filePath = sprintf(
                 '%s/%s/%s/%s_%s.%s',
                 'test' === $this->env ? 'test-images' : 'images',

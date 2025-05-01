@@ -22,7 +22,7 @@ class UserResponseDto
     private \DateTime $createdAt;
 
     #[Groups(['user:read'])]
-    private ?int $locationId;
+    private ?int $locationId = null;
 
     #[Groups(['user:read'])]
     private \DateTime $lastActive;

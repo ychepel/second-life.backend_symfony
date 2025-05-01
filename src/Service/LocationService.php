@@ -19,9 +19,7 @@ class LocationService
     {
         $locations = $this->locationRepository->findAll();
 
-        return array_map(function (Location $location) {
-            return $this->mappingService->toDto($location);
-        }, $locations);
+        return array_map(fn(Location $location) => $this->mappingService->toDto($location), $locations);
     }
 
     public function getById(int $id): ?LocationDto

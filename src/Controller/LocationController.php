@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1/locations')]
 class LocationController extends AbstractController
 {
     public function __construct(
@@ -17,8 +16,7 @@ class LocationController extends AbstractController
         private readonly LocationService $locationService,
     ) {
     }
-
-    #[Route('', name: 'locations_list', methods: ['GET'])]
+    #[Route('/api/v1/locations', name: 'locations_list', methods: ['GET'])]
     public function getLocations(): JsonResponse
     {
         try {
@@ -33,8 +31,7 @@ class LocationController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    #[Route('/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/api/v1/locations/{id}', name: 'location_get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getLocation(int $id): JsonResponse
     {
         try {

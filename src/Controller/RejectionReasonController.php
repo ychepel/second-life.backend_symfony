@@ -10,10 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/v1')]
 class RejectionReasonController extends AbstractController
 {
-    #[Route('/rejection-reasons', name: 'rejection_reasons', methods: ['GET'])]
+    #[Route('/api/v1/rejection-reasons', name: 'rejection_reasons', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function getRejectionReasons(
         RejectionReasonService $rejectionReasonService,

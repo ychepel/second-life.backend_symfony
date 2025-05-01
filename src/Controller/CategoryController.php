@@ -14,7 +14,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/v1/categories')]
 class CategoryController extends AbstractController
 {
     public function __construct(
@@ -22,8 +21,7 @@ class CategoryController extends AbstractController
         private readonly CategoryService $categoryService,
     ) {
     }
-
-    #[Route('/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/api/v1/categories/{id}', name: 'category_get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getCategory(int $id): JsonResponse
     {
         try {
@@ -42,8 +40,7 @@ class CategoryController extends AbstractController
 
         return $this->json($categoryDto);
     }
-
-    #[Route('', name: 'categories_list', methods: ['GET'])]
+    #[Route('/api/v1/categories', name: 'categories_list', methods: ['GET'])]
     public function getCategories(): JsonResponse
     {
         try {
@@ -58,8 +55,7 @@ class CategoryController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    #[Route('/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
+    #[Route('/api/v1/categories/get-all-for-admin', name: 'categories_get_all_for_admin', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function getAllCategoriesForAdmin(): JsonResponse
     {
@@ -75,8 +71,7 @@ class CategoryController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    #[Route(path: '', name: 'category_add', methods: ['POST'])]
+    #[Route(path: '/api/v1/categories', name: 'category_add', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function register(#[MapRequestPayload] CategoryRequestDto $request): JsonResponse
     {
@@ -88,8 +83,7 @@ class CategoryController extends AbstractController
 
         return $this->json($response, Response::HTTP_CREATED);
     }
-
-    #[Route(path: '/{id}', name: 'category_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
+    #[Route(path: '/api/v1/categories/{id}', name: 'category_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN')]
     public function updateCategory(int $id, #[MapRequestPayload] CategoryRequestDto $request): JsonResponse
     {
@@ -101,8 +95,7 @@ class CategoryController extends AbstractController
             return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
-
-    #[Route(path: '/{id}', name: 'category_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[Route(path: '/api/v1/categories/{id}', name: 'category_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteCategory(int $id): JsonResponse
     {
@@ -114,8 +107,7 @@ class CategoryController extends AbstractController
             return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
-
-    #[Route(path: '/{id}/set-active', name: 'category_set_active', requirements: ['id' => '\d+'], methods: ['PATCH'])]
+    #[Route(path: '/api/v1/categories/{id}/set-active', name: 'category_set_active', requirements: ['id' => '\d+'], methods: ['PATCH'])]
     #[IsGranted('ROLE_ADMIN')]
     public function setCategoryActive(int $id): JsonResponse
     {

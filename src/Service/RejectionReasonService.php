@@ -18,8 +18,6 @@ class RejectionReasonService
     {
         $reasons = $this->rejectionReasonRepository->findAll();
 
-        return array_map(function (RejectionReason $rejectionReason) {
-            return $this->mappingService->toDto($rejectionReason);
-        }, $reasons);
+        return array_map(fn(RejectionReason $rejectionReason) => $this->mappingService->toDto($rejectionReason), $reasons);
     }
 }

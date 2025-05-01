@@ -17,7 +17,6 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/v1/auth')]
 class AuthController extends AbstractController
 {
     public function __construct(
@@ -25,8 +24,7 @@ class AuthController extends AbstractController
         private readonly Security $security,
     ) {
     }
-
-    #[Route('/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
+    #[Route('/api/v1/auth/{roleName}/login', name: 'auth_login', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function login(
         #[MapRequestPayload] LoginRequestDto $loginRequest,
         string $roleName,
@@ -55,8 +53,7 @@ class AuthController extends AbstractController
 
         return $response;
     }
-
-    #[Route('/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
+    #[Route('/api/v1/auth/{roleName}/access', name: 'auth_access', requirements: ['roleName' => 'admin|user'], methods: ['POST'])]
     public function refreshAccessToken(
         #[MapRequestPayload] RefreshTokenRequestDto $refreshTokenRequest,
         string $roleName,
@@ -85,8 +82,7 @@ class AuthController extends AbstractController
 
         return $response;
     }
-
-    #[Route('/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
+    #[Route('/api/v1/auth/{roleName}/logout', name: 'auth_logout', requirements: ['roleName' => 'admin|user'], methods: ['GET'])]
     #[IsGranted(new MultiplyRolesExpression(UserRole::ROLE_USER, UserRole::ROLE_ADMIN))]
     public function logout(string $roleName): Response
     {

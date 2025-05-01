@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 
 class EntityWithImageRepository extends ServiceEntityRepository
 {
-    private string $className;
+    private readonly string $className;
 
     public function __construct(ManagerRegistry $registry, private readonly LoggerInterface $logger)
     {

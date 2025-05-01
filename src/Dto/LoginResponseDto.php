@@ -4,15 +4,8 @@ namespace App\Dto;
 
 class LoginResponseDto
 {
-    private int $clientId;
-    private string $accessToken;
-    private string $refreshToken;
-
-    public function __construct(int $clientId, string $accessToken, string $refreshToken)
+    public function __construct(private int $clientId, private string $accessToken, private string $refreshToken)
     {
-        $this->clientId = $clientId;
-        $this->accessToken = $accessToken;
-        $this->refreshToken = $refreshToken;
     }
 
     public function getClientId(): int

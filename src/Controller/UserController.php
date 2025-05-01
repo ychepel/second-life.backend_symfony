@@ -10,10 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1')]
 class UserController extends AbstractController
 {
-    #[Route(path: '/users/register', name: 'register', methods: ['POST'])]
+    #[Route(path: '/api/v1/users/register', name: 'register', methods: ['POST'])]
     public function register(#[MapRequestPayload] UserRegistrationRequestDto $request, UserService $userService): JsonResponse
     {
         $response = $userService->createUser($request);

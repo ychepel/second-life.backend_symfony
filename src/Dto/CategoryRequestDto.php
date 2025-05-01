@@ -4,26 +4,17 @@ namespace App\Dto;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CategoryRequestDto
+class CategoryRequestDto implements \Stringable
 {
-    #[Assert\All([
+    public function __construct(#[Assert\All([
         new Assert\NotBlank(),
         new Assert\Uuid(),
     ])]
-    private array $baseNameOfImages = [];
-
-    #[Assert\NotBlank]
+    private array $baseNameOfImages, #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 64)]
-    private string $name;
-
-    #[Assert\Length(min: 0, max: 1000)]
-    private string $description;
-
-    public function __construct(array $baseNameOfImages, string $name, string $description)
+    private string $name, #[Assert\Length(min: 0, max: 1000)]
+    private string $description)
     {
-        $this->baseNameOfImages = $baseNameOfImages;
-        $this->name = $name;
-        $this->description = $description;
     }
 
     public function getBaseNameOfImages(): array
